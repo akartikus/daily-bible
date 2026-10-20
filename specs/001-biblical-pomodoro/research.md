@@ -57,6 +57,10 @@ l'alarme périodique reprend à partir du réveil — exactement l'edge case
 « sortie de veille » de la spec. Période minimale 30 s en production
 (aucune limite en extension non empaquetée — utile pour les tests).
 
+**Caveat**: Chrome peut différer le déclenchement d'une alarme au-delà de sa
+date prévue d'un montant arbitraire (économie d'énergie) — SC-005 est donc
+un seuil d'acceptation vérifié manuellement, pas une garantie.
+
 **Alternatives considered**: `setTimeout` dans le service worker (tué après
 ~30 s d'inactivité) ; garder une fenêtre ouverte en permanence (intrusif) ;
 `persistAcrossSessions` (Chrome ≥ 150 uniquement — la recréation au

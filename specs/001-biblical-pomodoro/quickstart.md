@@ -43,7 +43,8 @@ npm run check        # svelte-check + ESLint
 | 5 | Intervalle invalide | Saisir 0, puis 1500 | Refus avec message ; dernière valeur valide conservée | FR-008 |
 | 6 | Hors connexion | Couper le réseau, cliquer sur l'icône | Message clair + « Réessayer » ; pas de plantage | FR-011 |
 | 7 | Sortie de veille | Auto activé (1 min), mettre la machine en veille 5 min, réveiller | Un seul verset affiché ; le cycle reprend à la prochaine échéance | Edge case spec |
+| 8 | Échec à l'échéance auto | Auto activé (1 min), couper le réseau avant l'échéance | Le popup s'ouvre : ErrorView + « Réessayer » si aucun verset en cours, sinon ancien verset affiché ; pas de plantage | FR-011 |
 
 Note : en extension non empaquetée, `chrome.alarms` n'a pas de période
-minimale — l'intervalle de 1 minute des scénarios 3 à 5 est donc testable
-en développement.
+minimale — l'intervalle de 1 minute des scénarios 3 à 5 et 8 est donc
+testable en développement.

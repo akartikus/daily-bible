@@ -122,8 +122,9 @@ vérifiant sa persistance après redémarrage du navigateur.
 - **FR-001**: Le système DOIT afficher un verset biblique (texte +
   référence) lorsque l'utilisateur clique sur l'icône de l'extension.
 - **FR-002**: Le système DOIT sélectionner un nouveau verset par tirage
-  aléatoire parmi tous les versets de la traduction choisie à chaque
-  échéance de l'intervalle ; un clic manuel réaffiche le verset en cours du
+  aléatoire parmi les versets de la traduction choisie à chaque échéance de
+  l'intervalle — uniformité approximative (chaque verset a une chance
+  comparable d'être tiré) ; un clic manuel réaffiche le verset en cours du
   cycle courant, sans consommer un nouveau tirage ni affecter le minuteur.
   Au premier usage (aucun verset en cours), le clic initialise le verset du
   cycle courant.
@@ -173,8 +174,10 @@ vérifiant sa persistance après redémarrage du navigateur.
   depuis l'icône de l'extension.
 - **SC-004**: Les réglages sont conservés à 100 % après redémarrage du
   navigateur.
-- **SC-005**: L'affichage automatique se déclenche à 5 secondes près de
-  l'intervalle défini.
+- **SC-005**: L'affichage automatique se déclenche dans les 30 secondes
+  suivant l'échéance de l'intervalle défini (Chrome peut différer une
+  alarme au-delà de toute borne ; seuil d'acceptation vérifié en test
+  manuel avec un intervalle court).
 
 ## Assumptions
 
@@ -197,6 +200,8 @@ vérifiant sa persistance après redémarrage du navigateur.
   « notification du navigateur »).
 - « Cliquer dessus » signifie cliquer sur l'icône de l'extension dans la
   barre d'outils Chrome.
-- Périmètre v1 : Chrome desktop uniquement (pas Firefox, Edge, ni mobile).
+- Périmètre v1 : Chrome desktop ≥ 127 uniquement (pas Firefox, Edge, ni
+  mobile) — l'ouverture automatique du popup sans geste utilisateur
+  (`chrome.action.openPopup()`) requiert Chrome 127.
 - Versets thématiques selon la période du calendrier (avent, carême, etc.) :
   évolution future envisagée, hors périmètre v1.

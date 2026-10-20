@@ -37,10 +37,14 @@ montage → lecture currentCycle
 
 ## Ouverture automatique (affichage auto activé)
 
-À chaque échéance de l'alarme `verse-interval`, le service worker tire un
-nouveau verset, l'écrit dans `currentCycle`, puis appelle
-`chrome.action.openPopup()`. Si l'appel échoue (popup déjà ouvert…), le
-verset reste disponible au clic suivant — aucun blocage.
+À chaque échéance de l'alarme `verse-interval`, le service worker appelle
+d'abord `chrome.action.openPopup()` sans condition, puis tire un nouveau
+verset et l'écrit dans `currentCycle`. Si l'appel `openPopup()` échoue
+(popup déjà ouvert…), le verset reste disponible au clic suivant — aucun
+blocage. Si le tirage échoue (FR-011) : le popup affiche ErrorView avec
+« Réessayer » lorsqu'aucun verset n'est en cours ; si un verset précédent
+existe, il reste affiché (dégradation gracieuse) et un nouveau tirage aura
+lieu à la prochaine échéance.
 
 ## Hors périmètre v1
 

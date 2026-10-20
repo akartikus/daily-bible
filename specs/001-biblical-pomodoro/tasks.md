@@ -96,7 +96,7 @@ d'après spec.md) pour permettre implémentation et validation indépendantes.
 - [ ] T021 [P] [US2] Implémenter les réglages dans src/shared/settings/defaults.ts (défauts ci-dessus) et src/shared/settings/validate.ts (contraintes verbatim data-model.md : « entier, 1 ≤ x ≤ 1440 »)
 - [ ] T022 [P] [US2] Implémenter le wrapper alarms dans src/shared/chrome/alarms.ts : alarme nommée « verse-interval », create/clear/ensure
 - [ ] T023 [P] [US2] Implémenter le wrapper action dans src/shared/chrome/action.ts : openPopup() avec échec non bloquant (journaliser et continuer — research.md §4)
-- [ ] T024 [US2] Étendre src/background/service-worker.ts : garantir l'alarme à onStartup/onInstalled si autoDisplayEnabled ; réagir à storage.onChanged sur settings (recréer/supprimer l'alarme) ; à onAlarm → tirer un nouveau verset, écrire currentCycle, appeler openPopup() (dépend de T012, T014, T021–T023) ; valider les scénarios 4 et 7 de quickstart.md
+- [ ] T024 [US2] Étendre src/background/service-worker.ts : garantir l'alarme à onStartup/onInstalled si autoDisplayEnabled ; réagir à storage.onChanged sur settings (recréer/supprimer l'alarme) ; à onAlarm → appeler openPopup() sans condition PUIS tirer un nouveau verset et écrire currentCycle ; en cas d'échec du tirage, le popup affiche ErrorView si aucun verset n'est en cours, sinon l'ancien verset reste (dégradation gracieuse — FR-011, contracts/ui-behavior.md) (dépend de T012, T014, T021–T023) ; valider les scénarios 4, 7 et 8 de quickstart.md
 
 **Checkpoint**: Le pomodoro biblique bat — ouverture automatique à chaque échéance, comportement correct après veille
 
@@ -123,7 +123,7 @@ d'après spec.md) pour permettre implémentation et validation indépendantes.
 **Purpose**: Améliorations transversales aux trois stories
 
 - [ ] T028 Exécuter les portes qualité définies dans package.json (npm run check, npm run test, npm run build) ; corriger tout échec dans les fichiers concernés (constitution — Development Workflow : CI rouge bloque)
-- [ ] T029 Exécuter les 7 scénarios de validation de specs/001-biblical-pomodoro/quickstart.md dans Chrome ≥ 127 (dist/ chargé non empaqueté) et consigner les résultats (SC-001 à SC-005)
+- [ ] T029 Exécuter les 8 scénarios de validation de specs/001-biblical-pomodoro/quickstart.md dans Chrome ≥ 127 (dist/ chargé non empaqueté) et consigner les résultats (SC-001 à SC-005)
 - [ ] T030 Mettre à jour la documentation des contextes concernés : docs/context/001-verse-display.md, docs/context/001-auto-display.md, docs/context/001-settings.md (statut, décisions d'implémentation) et docs/context/index.md si un statut change (règle projet)
 
 ---
