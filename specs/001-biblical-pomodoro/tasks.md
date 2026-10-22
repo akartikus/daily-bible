@@ -32,10 +32,10 @@ d'après spec.md) pour permettre implémentation et validation indépendantes.
 
 **Purpose**: Initialisation du projet et structure de base
 
-- [ ] T001 Initialiser le projet à la racine du dépôt : package.json, vite.config.ts (@crxjs/vite-plugin), tsconfig.json (strict) avec Svelte 5, TypeScript 5, @types/chrome — per plan.md Technical Context
-- [ ] T002 [P] Créer le manifeste MV3 dans src/manifest.ts : permissions ["storage", "alarms"], host_permissions ["https://bible.helloao.org/*"], minimum_chrome_version "127", action.default_popup, background.service_worker — per plan.md Structure Decision
-- [ ] T003 [P] Configurer l'outillage qualité : eslint.config.js (flat config), .prettierrc, scripts npm (dev/build/check/test) — per constitution II (outils standard, verdicts acceptés)
-- [ ] T004 Configurer Tailwind CSS 4 via @tailwindcss/vite et l'entrée popup (src/popup/index.html, src/popup/main.ts, src/popup/App.svelte minimal) ; vérifier que npm run build produit dist/ chargeable dans Chrome (dépend de T001, T002)
+- [X] T001 Initialiser le projet à la racine du dépôt : package.json, vite.config.ts (@crxjs/vite-plugin), tsconfig.json (strict) avec Svelte 5, TypeScript 5, @types/chrome — per plan.md Technical Context
+- [X] T002 [P] Créer le manifeste MV3 dans src/manifest.ts : permissions ["storage", "alarms"], host_permissions ["https://bible.helloao.org/*"], minimum_chrome_version "127", action.default_popup, background.service_worker — per plan.md Structure Decision
+- [X] T003 [P] Configurer l'outillage qualité : eslint.config.js (flat config), .prettierrc, scripts npm (dev/build/check/test) — per constitution II (outils standard, verdicts acceptés)
+- [X] T004 Configurer Tailwind CSS 4 via @tailwindcss/vite et l'entrée popup (src/popup/index.html, src/popup/main.ts, src/popup/App.svelte minimal) ; vérifier que npm run build produit dist/ chargeable dans Chrome (dépend de T001, T002)
 
 ---
 
