@@ -1,0 +1,11 @@
+node_modules/
+dist/
+coverage/
+package-lock.json
+npm-shrinkwrap.json
+pnpm-lock.yaml
+.specify/
+.agents/
+docs/
+specs/
+*.md
