@@ -73,7 +73,7 @@ d'après spec.md) pour permettre implémentation et validation indépendantes.
 - [X] T014 [US1] Implémenter l'orchestration dans src/background/service-worker.ts : au message « ensure-current-verse » → si currentCycle.verse est null : tirer un verset (BookIndex → livre pondéré → chapitre → extraction), écrire currentCycle, répondre ; sinon répondre le verset existant (FR-002 : le clic réaffiche sans consommer de tirage) (dépend de T010–T013)
 - [X] T015 [P] [US1] Créer VerseView.svelte dans src/popup/components/ (texte du verset, référence « livre chapitre:verset », traduction — FR-009) + tests composant dans tests/component/VerseView.test.ts
 - [X] T016 [P] [US1] Créer ErrorView.svelte dans src/popup/components/ (message clair + bouton « Réessayer », jamais d'écran vide — FR-011) + tests composant dans tests/component/ErrorView.test.ts
-- [ ] T017 [US1] Créer le store du verset courant dans src/popup/lib/verse.svelte.ts : lecture de currentCycle au montage, demande au service worker si null, états loading/erreur — per contracts/ui-behavior.md (dépend de T013, T015, T016)
+- [X] T017 [US1] Créer le store du verset courant dans src/popup/lib/verse.svelte.ts : lecture de currentCycle au montage, demande au service worker si null, états loading/erreur — per contracts/ui-behavior.md (dépend de T013, T015, T016)
 - [ ] T018 [US1] Câbler src/popup/App.svelte (bascule VerseView ↔ ErrorView, « Réessayer » relance la demande — ui-behavior.md) et valider les scénarios 1, 2 et 6 de quickstart.md
 
 **Checkpoint**: MVP fonctionnel — verset à la demande, réaffichage au clic, erreur gracieuse hors connexion
