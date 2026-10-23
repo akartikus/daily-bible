@@ -22,3 +22,9 @@ jobs:
       - run: npm run check
       - run: npm run test
       - run: npm run build
+      # Publie l'extension non empaquetée (dist/) — chargeable dans Chrome
+      # depuis l'artefact du run (validation T029 sans reconstruire en local).
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
