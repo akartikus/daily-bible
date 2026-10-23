@@ -60,7 +60,7 @@ d'après spec.md) pour permettre implémentation et validation indépendantes.
 
 ### Tests for User Story 1
 
-- [ ] T007 [P] [US1] Tests de contrat du client API dans tests/unit/api.test.ts per contracts/bible-api.md : shapes books.json/chapitre, timeout 10 s, erreurs réseau/HTTP/JSON mappées vers un type d'erreur utilisateur — écrire d'abord, vérifier l'échec (RED)
+- [X] T007 [P] [US1] Tests de contrat du client API dans tests/unit/api.test.ts per contracts/bible-api.md : shapes books.json/chapitre, timeout 10 s, erreurs réseau/HTTP/JSON mappées vers un type d'erreur utilisateur — écrire d'abord, vérifier l'échec (RED)
 - [ ] T008 [P] [US1] Tests unitaires de l'extraction de verset dans tests/unit/extract.test.ts : concaténation des chaînes et FormattedText.text, ignorance des VerseFootnoteReference et InlineLineBreak — per data-model.md (Verse)
 - [ ] T009 [P] [US1] Tests unitaires du tirage pondéré dans tests/unit/random.test.ts : livre pondéré par totalNumberOfVerses, chapitre et verset uniformes — per research.md §2
 
