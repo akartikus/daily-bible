@@ -60,5 +60,3 @@ export class VerseStore {
     });
   }
 }
-
-export const verseStore = new VerseStore();
