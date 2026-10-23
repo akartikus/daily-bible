@@ -45,8 +45,8 @@ d'après spec.md) pour permettre implémentation et validation indépendantes.
 
 **⚠️ CRITICAL**: Aucune user story ne peut commencer avant la fin de cette phase
 
-- [ ] T005 Créer le mock des APIs Chrome dans tests/mocks/chrome.ts (storage, alarms, action, runtime — vi.mock) utilisé par toutes les suites de tests
-- [ ] T006 Implémenter le wrapper chrome.storage.local typé dans src/shared/chrome/storage.ts (get/set/onChanged pour les clés settings, currentCycle, bookIndex — contracts/storage-schema.md) + tests unitaires dans tests/unit/storage.test.ts (dépend de T005)
+- [X] T005 Créer le mock des APIs Chrome dans tests/mocks/chrome.ts (storage, alarms, action, runtime — vi.mock) utilisé par toutes les suites de tests
+- [X] T006 Implémenter le wrapper chrome.storage.local typé dans src/shared/chrome/storage.ts (get/set/onChanged pour les clés settings, currentCycle, bookIndex — contracts/storage-schema.md) + tests unitaires dans tests/unit/storage.test.ts (dépend de T005)
 
 **Checkpoint**: Fondations prêtes — les user stories peuvent commencer
 
