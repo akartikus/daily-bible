@@ -85,7 +85,9 @@ describe("client Free Use Bible API (contracts/bible-api.md)", () => {
 
   describe("fetchBookIndex", () => {
     it("récupère books.json et renvoie un BookIndex (translationId, books, fetchedAt)", async () => {
-      const fetchMock = vi.fn(async () => jsonRespond(booksPayload()));
+      const fetchMock = vi.fn(async (_url: string) =>
+        jsonRespond(booksPayload()),
+      );
       vi.stubGlobal("fetch", fetchMock);
 
       const index = await fetchBookIndex(TRANSLATION_ID);
@@ -128,7 +130,9 @@ describe("client Free Use Bible API (contracts/bible-api.md)", () => {
 
   describe("fetchChapter", () => {
     it("récupère le chapitre et expose les champs consommés", async () => {
-      const fetchMock = vi.fn(async () => jsonRespond(chapterPayload()));
+      const fetchMock = vi.fn(async (_url: string) =>
+        jsonRespond(chapterPayload()),
+      );
       vi.stubGlobal("fetch", fetchMock);
 
       const chapter = await fetchChapter(TRANSLATION_ID, "GEN", 1);

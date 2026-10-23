@@ -15,4 +15,13 @@ export default tseslint.config(
       },
     },
   },
+  {
+    rules: {
+      // Aligné sur noUnusedParameters (tsc) : les paramètres préfixés `_` sont ignorés.
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        { argsIgnorePattern: "^_" },
+      ],
+    },
+  },
 );

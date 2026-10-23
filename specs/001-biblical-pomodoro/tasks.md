@@ -68,7 +68,7 @@ d'après spec.md) pour permettre implémentation et validation indépendantes.
 
 - [ ] T010 [P] [US1] Implémenter l'extraction de verset (fonction pure) dans src/shared/bible/extract.ts et y définir le type Verse (bookId, bookName, chapterNumber, verseNumber, text, translationId, translationName, fetchedAt — data-model.md)
 - [ ] T011 [P] [US1] Implémenter le tirage aléatoire pondéré (fonction pure) dans src/shared/bible/random.ts
-- [ ] T012 [US1] Implémenter le client API dans src/shared/bible/api.ts : GET books.json → cache BookIndex (invalidation 30 jours) via le wrapper storage, GET chapitre, timeout 10 s, mapping d'erreurs (dépend de T006)
+- [X] T012 [US1] Implémenter le client API dans src/shared/bible/api.ts : GET books.json → cache BookIndex (invalidation 30 jours) via le wrapper storage, GET chapitre, timeout 10 s, mapping d'erreurs (dépend de T006)
 - [ ] T013 [P] [US1] Implémenter le wrapper de messagerie dans src/shared/chrome/runtime.ts (sendMessage/onMessage typés) + tests unitaires dans tests/unit/runtime.test.ts
 - [ ] T014 [US1] Implémenter l'orchestration dans src/background/service-worker.ts : au message « ensure-current-verse » → si currentCycle.verse est null : tirer un verset (BookIndex → livre pondéré → chapitre → extraction), écrire currentCycle, répondre ; sinon répondre le verset existant (FR-002 : le clic réaffiche sans consommer de tirage) (dépend de T010–T013)
 - [ ] T015 [P] [US1] Créer VerseView.svelte dans src/popup/components/ (texte du verset, référence « livre chapitre:verset », traduction — FR-009) + tests composant dans tests/component/VerseView.test.ts
