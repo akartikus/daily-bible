@@ -49,7 +49,7 @@ Never cut: validation at trust boundaries, error handling that prevents data los
 - Après un changement architectural, proposer la mise à jour de la documentation concernée.
 - Cocher une tâche dans `tasks.md` uniquement après son implémentation et sa vérification.
 - Ne pas modifier les spécifications ou les tâches hors du périmètre demandé sans accord.
-- Le format des commits doit être quand c'est possible<numero-de-la-spec>-<numero-de-la-tâche>: <le-message>
+- Le format des commits doit être quand c'est possible<numero-de-la-spec>-<numero-de-la-tâche>: <le-message-en-anglais>
 
 ## Vérification et tests
 
