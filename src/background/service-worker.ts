@@ -1,10 +1,16 @@
 /**
- * Orchestration du pomodoro biblique (service worker MV3). Au message
- * « ensure-current-verse » : réaffiche le verset du cycle courant s'il existe
- * (FR-002 : un clic manuel ne consomme pas de tirage), sinon tire un verset
- * (BookIndex → livre pondéré → chapitre → extraction), l'écrit dans
- * currentCycle et répond. Toute erreur est convertie en réponse { error }
- * affichable (FR-011 : jamais de plantage).
+ * Orchestration du pomodoro biblique (service worker MV3).
+ *
+ * - Au message « ensure-current-verse » : réaffiche le verset du cycle
+ *   courant s'il existe (FR-002 : un clic manuel ne consomme pas de tirage),
+ *   sinon tire un verset, l'écrit dans currentCycle et répond. Toute erreur
+ *   est convertie en réponse { error } affichable (FR-011).
+ * - Pomodoro automatique (FR-003/FR-005) : l'alarme « verse-interval » est
+ *   garantie à chaque démarrage du service worker (onStartup/onInstalled)
+ *   si l'affichage auto est activé, recréée/supprimée au changement de
+ *   réglages, et à chaque échéance le popup s'ouvre sans condition puis un
+ *   nouveau verset est tiré. En cas d'échec du tirage, l'ancien verset reste
+ *   (dégradation gracieuse — contracts/ui-behavior.md).
  */
 
 import {
@@ -18,8 +24,16 @@ import {
   pickUniformVerseNumber,
   pickWeightedBook,
 } from "../shared/bible/random";
+import { openPopup } from "../shared/chrome/action";
+import {
+  ALARM_NAME,
+  clearVerseIntervalAlarm,
+  createVerseIntervalAlarm,
+  ensureVerseIntervalAlarm,
+} from "../shared/chrome/alarms";
 import { onMessage } from "../shared/chrome/runtime";
-import { get, set } from "../shared/chrome/storage";
+import { get, onChanged, set } from "../shared/chrome/storage";
+import { DEFAULT_SETTINGS, type Settings } from "../shared/settings/defaults";
 
 const TRANSLATION_ID = "fra_lsg";
 const TRANSLATION_NAME = "Louis Segond 1910";
@@ -43,24 +57,81 @@ onMessage<EnsureCurrentVerseRequest>((message, _sender, sendResponse) => {
   return true; // garde le canal ouvert pour la réponse asynchrone
 });
 
+// Garantir l'alarme à chaque démarrage du service worker (recommandation
+// officielle chrome.alarms — data-model.md Alarm) si l'affichage auto est
+// activé ; ensure ne recrée pas une alarme déjà présente (rythme fixe).
+chrome.runtime.onStartup.addListener(() => {
+  void ensureAlarmFromSettings();
+});
+chrome.runtime.onInstalled.addListener(() => {
+  void ensureAlarmFromSettings();
+});
+
+// Recréer ou supprimer l'alarme à chaque écriture des réglages :
+// activation, désactivation, changement d'intervalle (storage-schema.md).
+onChanged((changes) => {
+  if (!changes.settings) {
+    return;
+  }
+  const settings =
+    (changes.settings.newValue as Settings | undefined) ?? DEFAULT_SETTINGS;
+  if (settings.autoDisplayEnabled) {
+    createVerseIntervalAlarm(settings.intervalMinutes);
+  } else {
+    void clearVerseIntervalAlarm();
+  }
+});
+
+// À l'échéance : ouvrir le popup sans condition, puis tirer un nouveau
+// verset (contracts/ui-behavior.md — ouverture automatique).
+chrome.alarms.onAlarm.addListener((alarm) => {
+  if (alarm.name !== ALARM_NAME) {
+    return;
+  }
+  void onVerseInterval();
+});
+
+async function ensureAlarmFromSettings(): Promise<void> {
+  const settings = (await get<Settings>("settings")) ?? DEFAULT_SETTINGS;
+  if (settings.autoDisplayEnabled) {
+    await ensureVerseIntervalAlarm(settings.intervalMinutes);
+  }
+}
+
+async function onVerseInterval(): Promise<void> {
+  await openPopup();
+  try {
+    const verse = await drawRandomVerse();
+    await set("currentCycle", { verse, startedAt: Date.now() });
+  } catch (error) {
+    // Dégradation gracieuse (FR-011) : l'ancien verset reste affiché ; sans
+    // verset en cours, le popup affichera ErrorView via ensure-current-verse.
+    console.warn("Tirage à l'échéance de l'alarme échoué :", error);
+  }
+}
+
+async function drawRandomVerse(): Promise<Verse> {
+  const bookIndex = await fetchBookIndex(TRANSLATION_ID);
+  const book = pickWeightedBook(bookIndex.books);
+  const chapter = await fetchChapter(
+    TRANSLATION_ID,
+    book.id,
+    pickUniformChapterNumber(book),
+  );
+  return extractVerse(
+    chapter,
+    pickUniformVerseNumber(chapter.numberOfVerses),
+    TRANSLATION_NAME,
+  );
+}
+
 async function ensureCurrentVerse(): Promise<EnsureCurrentVerseResponse> {
   try {
     const currentCycle = await get<CurrentCycle>("currentCycle");
     if (currentCycle?.verse) {
       return { verse: currentCycle.verse };
     }
-    const bookIndex = await fetchBookIndex(TRANSLATION_ID);
-    const book = pickWeightedBook(bookIndex.books);
-    const chapter = await fetchChapter(
-      TRANSLATION_ID,
-      book.id,
-      pickUniformChapterNumber(book),
-    );
-    const verse = extractVerse(
-      chapter,
-      pickUniformVerseNumber(chapter.numberOfVerses),
-      TRANSLATION_NAME,
-    );
+    const verse = await drawRandomVerse();
     await set("currentCycle", { verse, startedAt: Date.now() });
     return { verse };
   } catch (error) {

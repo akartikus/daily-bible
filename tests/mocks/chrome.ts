@@ -33,11 +33,19 @@ type MessageListener = (
   sendResponse: (response: unknown) => void,
 ) => boolean | undefined | void;
 
+type StartupListener = () => void;
+
+type InstalledListener = (details: { reason: "install" | "update" }) => void;
+
 export interface ChromeMock {
   /** Objet à installer comme global `chrome` (vi.stubGlobal). */
   chrome: typeof chrome;
   /** Simule le déclenchement de `chrome.alarms.onAlarm`. */
   fireAlarm(name: string): void;
+  /** Simule le démarrage du navigateur (`chrome.runtime.onStartup`). */
+  fireStartup(): void;
+  /** Simule l'installation/mise à jour (`chrome.runtime.onInstalled`). */
+  fireInstalled(): void;
   /** Simule un changement de stockage, typiquement hors zone `local`. */
   fireStorageChange(
     changes: Record<string, StorageChange>,
@@ -50,6 +58,8 @@ export function createChromeMock(): ChromeMock {
   const storageListeners = new Set<StorageListener>();
   const alarmListeners = new Set<AlarmListener>();
   const messageListeners = new Set<MessageListener>();
+  const startupListeners = new Set<StartupListener>();
+  const installedListeners = new Set<InstalledListener>();
   const alarms = new Map<string, Alarm>();
 
   function fireStorageChange(
@@ -166,6 +176,22 @@ export function createChromeMock(): ChromeMock {
           messageListeners.delete(listener),
         ),
       },
+      onStartup: {
+        addListener: vi.fn((listener: StartupListener) =>
+          startupListeners.add(listener),
+        ),
+        removeListener: vi.fn((listener: StartupListener) =>
+          startupListeners.delete(listener),
+        ),
+      },
+      onInstalled: {
+        addListener: vi.fn((listener: InstalledListener) =>
+          installedListeners.add(listener),
+        ),
+        removeListener: vi.fn((listener: InstalledListener) =>
+          installedListeners.delete(listener),
+        ),
+      },
     },
   };
 
@@ -175,6 +201,16 @@ export function createChromeMock(): ChromeMock {
       const alarm = alarms.get(name) ?? { name, periodInMinutes: undefined };
       for (const listener of alarmListeners) {
         listener(alarm);
+      }
+    },
+    fireStartup(): void {
+      for (const listener of startupListeners) {
+        listener();
+      }
+    },
+    fireInstalled(): void {
+      for (const listener of installedListeners) {
+        listener({ reason: "install" });
       }
     },
     fireStorageChange,
