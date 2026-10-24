@@ -31,7 +31,7 @@
 
 ### Tests
 - 90 tests unitaires + composants passent
-- Scénarios quickstart 1, 2, 6 validés
+- Scénarios quickstart 1, 2 et 6 validés manuellement dans Chrome ≥ 127 (2026-10-24)
 
 ### Performance
 - Verset affiché < 3 s après clic (SC-001)

@@ -48,3 +48,9 @@ npm run check        # svelte-check + ESLint
 Note : en extension non empaquetée, `chrome.alarms` n'a pas de période
 minimale — l'intervalle de 1 minute des scénarios 3 à 5 et 8 est donc
 testable en développement.
+
+## Résultats de validation
+
+Les 8 scénarios ont été validés manuellement dans Google Chrome ≥ 127 le
+2026-10-24. Le compte rendu est disponible dans
+[001-validation.md](../../docs/context/001-validation.md).

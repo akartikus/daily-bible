@@ -123,7 +123,7 @@ d'après spec.md) pour permettre implémentation et validation indépendantes.
 **Purpose**: Améliorations transversales aux trois stories
 
 - [X] T028 Exécuter les portes qualité définies dans package.json (npm run check, npm run test, npm run build) ; corriger tout échec dans les fichiers concernés (constitution — Development Workflow : CI rouge bloque)
-- [ ] T029 Exécuter les 8 scénarios de validation de specs/001-biblical-pomodoro/quickstart.md dans Chrome ≥ 127 (dist/ chargé non empaqueté) et consigner les résultats (SC-001 à SC-005) — nécessite validation manuelle
+- [X] T029 Exécuter les 8 scénarios de validation de specs/001-biblical-pomodoro/quickstart.md dans Chrome ≥ 127 (dist/ chargé non empaqueté) et consigner les résultats (SC-001 à SC-005) — 8/8 conformes le 2026-10-24 ; voir [001-validation.md](../../docs/context/001-validation.md)
 - [X] T030 Mettre à jour la documentation des contextes concernés : docs/context/001-verse-display.md, docs/context/001-auto-display.md, docs/context/001-settings.md (statut, décisions d'implémentation) et docs/context/index.md si un statut change (règle projet)
 
 ---

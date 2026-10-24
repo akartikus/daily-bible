@@ -45,6 +45,7 @@ Ce que chaque tâche a apporté, en une ligne courte.
 ## Finitions / Qualité
 
 - T028 : toutes les portes qualité passent (types, tests, lint, format, build, taille du bundle).
+- T029 : les huit parcours de validation manuelle passent dans Chrome.
 - T030 : la documentation des contextes est à jour (verset, auto, réglages).
 - T032 : la taille du bundle (< 300 Ko gzippé) est vérifiée à chaque construction.
 - T033 : l'ouverture auto du popup est l'invitation à la pause (pas de libellé dédié).

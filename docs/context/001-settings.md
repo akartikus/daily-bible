@@ -37,4 +37,4 @@
 - Tests unitaires : settings.test.ts (défauts + validation intervalle), settings-store.test.ts
 - Tests composant : SettingsView.test.ts
 - 90 tests passent
-- Scénarios quickstart 3, 5 validés
+- Scénarios quickstart 3 et 5 validés manuellement dans Chrome ≥ 127 (2026-10-24)

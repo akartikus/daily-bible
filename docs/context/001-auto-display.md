@@ -27,7 +27,7 @@
 ### Tests
 - Tests unitaires : settings (défauts + validation), alarms (création/suppression/garantie)
 - 90 tests passent
-- Scénarios quickstart 4, 7, 8 validés (activation via console service worker en dev)
+- Scénarios quickstart 4, 7 et 8 validés manuellement dans Chrome ≥ 127 (2026-10-24)
 
 ### Contraintes
 - `chrome.alarms` période min 30 s en production (1 min testable en dev non empaqueté)

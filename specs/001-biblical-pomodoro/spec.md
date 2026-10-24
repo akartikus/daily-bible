@@ -4,7 +4,7 @@
 
 **Created**: 2026-10-20
 
-**Status**: Draft
+**Status**: Validé
 
 **Input**: User description: "Une extension Chrome user friendly avec une interface simple et épurée qui permet d'afficher un verset biblique à chaque fois qu'on clique dessus ou tous les X temps définis, comme un pomodoro biblique."
 
