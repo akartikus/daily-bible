@@ -1,20 +1,3 @@
-<!--
-SYNC IMPACT REPORT (temporary scratch material — remove before committing)
-
-Version change: (unratified template) → 1.0.0
-Modified principles: none (initial ratification; all template placeholders resolved)
-Added sections:
-  - Core Principles I–V (Readability First, Idiomatic Code, Simple Design,
-    Testability as a Design Constraint, Consistency & Maintainability)
-  - Code Quality Standards
-  - Development Workflow
-  - Governance
-Removed sections: none
-Follow-up TODOs: none (tech stack not yet chosen; principles are written
-language-agnostically and apply to any language/framework adopted)
-END SYNC IMPACT REPORT
--->
-
 # Daily Bible Constitution
 
 ## Core Principles

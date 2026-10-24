@@ -41,3 +41,11 @@ Ce que chaque tâche a apporté, en une ligne courte.
 - T025 : la fenêtre garde les réglages à jour.
 - T026 : écran de réglages : interrupteur d'affichage auto et intervalle en minutes ; une saisie impossible est refusée avec un message.
 - T027 : un bouton engrenage ouvre les réglages ; les réglages survivent au redémarrage de Chrome.
+
+## Finitions / Qualité
+
+- T028 : toutes les portes qualité passent (types, tests, lint, format, build, taille du bundle).
+- T030 : la documentation des contextes est à jour (verset, auto, réglages).
+- T032 : la taille du bundle (< 300 Ko gzippé) est vérifiée à chaque construction.
+- T033 : l'ouverture auto du popup est l'invitation à la pause (pas de libellé dédié).
+- T034 : le bloc temporaire « SYNC IMPACT REPORT » est retiré de la constitution.

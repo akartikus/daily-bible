@@ -122,9 +122,9 @@ d'après spec.md) pour permettre implémentation et validation indépendantes.
 
 **Purpose**: Améliorations transversales aux trois stories
 
-- [ ] T028 Exécuter les portes qualité définies dans package.json (npm run check, npm run test, npm run build) ; corriger tout échec dans les fichiers concernés (constitution — Development Workflow : CI rouge bloque)
-- [ ] T029 Exécuter les 8 scénarios de validation de specs/001-biblical-pomodoro/quickstart.md dans Chrome ≥ 127 (dist/ chargé non empaqueté) et consigner les résultats (SC-001 à SC-005)
-- [ ] T030 Mettre à jour la documentation des contextes concernés : docs/context/001-verse-display.md, docs/context/001-auto-display.md, docs/context/001-settings.md (statut, décisions d'implémentation) et docs/context/index.md si un statut change (règle projet)
+- [X] T028 Exécuter les portes qualité définies dans package.json (npm run check, npm run test, npm run build) ; corriger tout échec dans les fichiers concernés (constitution — Development Workflow : CI rouge bloque)
+- [ ] T029 Exécuter les 8 scénarios de validation de specs/001-biblical-pomodoro/quickstart.md dans Chrome ≥ 127 (dist/ chargé non empaqueté) et consigner les résultats (SC-001 à SC-005) — nécessite validation manuelle
+- [X] T030 Mettre à jour la documentation des contextes concernés : docs/context/001-verse-display.md, docs/context/001-auto-display.md, docs/context/001-settings.md (statut, décisions d'implémentation) et docs/context/index.md si un statut change (règle projet)
 
 ---
 
@@ -217,6 +217,6 @@ Task: "ErrorView.svelte dans src/popup/components/"                       # T016
 **Origine**: /speckit-converge (2026-10-23) — écarts entre l'état du code et spec/plan/tasks/constitution non couverts par les tâches existantes. T013–T030 restent le plan tracé ; cette phase ne couvre que les trous détectés.
 
 - [X] T031 Créer le workflow CI .github/workflows/ci.yml (Node 20, npm ci, puis format check + lint + type check + tests + build sur chaque push/PR) et ajouter les scripts npm `lint` et `format` manquants dans package.json — le dépôt n'a aucun CI alors que la Constitution l'exige (« CI MUST run format check, lint, type check, and tests on every PR » ; principe IV : « CI enforces these gates ») per Constitution Development Workflow (missing) — CRITICAL
-- [ ] T032 Ajouter la vérification « bundle du popup < 300 Ko gzippé » aux portes qualité (mesurer après npm run build, compléter T028) per plan.md Performance Goals (missing)
-- [ ] T033 Trancher l'« invitation à prendre une pause » et la documenter dans contracts/ui-behavior.md (option A : l'ouverture automatique du popup EST l'invitation, aucun libellé ; option B : libellé dédié dans VerseView → aligner T015) per spec.md clarification 2026-10-20 (partial)
-- [ ] T034 Supprimer le bloc résiduel « SYNC IMPACT REPORT » (matériau temporaire committé malgré sa note « remove before committing ») de .specify/memory/constitution.md per Constitution Governance (unrequested)
+- [X] T032 Ajouter la vérification « bundle du popup < 300 Ko gzippé » aux portes qualité (mesurer après npm run build, compléter T028) per plan.md Performance Goals (missing)
+- [X] T033 Trancher l'« invitation à prendre une pause » et la documenter dans contracts/ui-behavior.md (option A : l'ouverture automatique du popup EST l'invitation, aucun libellé ; option B : libellé dédié dans VerseView → aligner T015) per spec.md clarification 2026-10-20 (partial)
+- [X] T034 Supprimer le bloc résiduel « SYNC IMPACT REPORT » (matériau temporaire committé malgré sa note « remove before committing ») de .specify/memory/constitution.md per Constitution Governance (unrequested)

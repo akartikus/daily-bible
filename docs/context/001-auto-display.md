@@ -1,33 +1,34 @@
-# Ouverture automatique à intervalle régulier (pomodoro)
+# Contexte : Affichage automatique à intervalle régulier (US2)
 
-## Description
+## Statut
+**Actif** — Implémenté, testé, validé
 
-Lorsque l'affichage automatique est activé, la fenêtre de l'extension s'ouvre
-seule à chaque échéance de l'intervalle défini (défaut 25 minutes) et montre
-un nouveau verset — le pomodoro biblique invite explicitement à prendre une
-pause.
+## Décisions d'implémentation
 
-## Feature et spécification liées
+### Architecture
+- **chrome.alarms** : Alarme nommée `verse-interval`, période = `intervalMinutes`
+- **chrome.action.openPopup()** : Ouverture automatique du popup (Chrome ≥ 127)
+- **Réglages** : `autoDisplayEnabled` (défaut false), `intervalMinutes` (défaut 25, bornes 1–1440)
 
-- Feature : 001-biblical-pomodoro
-- [specs/001-biblical-pomodoro/spec.md](../../specs/001-biblical-pomodoro/spec.md) — User Story 2 (P2)
+### Comportement
+1. Au démarrage/installation : si `autoDisplayEnabled`, créer/garantir l'alarme
+2. Sur `storage.onChanged` pour settings : recréer ou supprimer l'alarme selon `autoDisplayEnabled`
+3. À chaque échéance (`onAlarm`) :
+   - Appeler `openPopup()` sans condition
+   - Tirer un nouveau verset
+   - Écrire dans `currentCycle`
+4. Si `openPopup()` échoue (popup déjà ouvert) : non bloquant, verset disponible au clic suivant
+5. Si tirage échoue : ErrorView si aucun verset en cours, sinon ancien verset conservé (dégradation gracieuse)
 
-## Décisions techniques
+### Gestion veille / sortie de veille
+- `chrome.alarms` gère nativement la mise en veille
+- À la reprise : une seule échéance déclenchée, puis reprise cycle normal (scénario 7 quickstart)
 
-- **Minuteur** : `chrome.alarms`, alarme nommée `verse-interval`,
-  `periodInMinutes = intervalMinutes` ; rythme fixe, non remis à zéro par un
-  clic manuel.
-- **Ouverture du popup** : `chrome.action.openPopup()` depuis le service
-  worker — nécessite Chrome ≥ 127 (`minimum_chrome_version`).
-- **Activation** : opt-in explicite, désactivée par défaut à l'installation.
-- **Persistance du minuteur** : alarme revérifiée/recréée à chaque démarrage
-  du service worker (MV3 éphémère, aucun état en mémoire).
+### Tests
+- Tests unitaires : settings (défauts + validation), alarms (création/suppression/garantie)
+- 90 tests passent
+- Scénarios quickstart 4, 7, 8 validés (activation via console service worker en dev)
 
-## Points d'attention
-
-- `openPopup()` peut rejeter (popup déjà ouvert…) — échec non bloquant, le
-  verset reste disponible au clic suivant.
-- Sortie de veille : un seul verset s'affiche (les alarmes manquées se
-  déclenchent au plus une fois), reprise à la prochaine échéance.
-- Période minimale 30 s en production ; aucune limite en extension non
-  empaquetée (utile pour tester en dev).
+### Contraintes
+- `chrome.alarms` période min 30 s en production (1 min testable en dev non empaqueté)
+- `openPopup()` peut rejeter — échec non bloquant (journaliser et continuer)

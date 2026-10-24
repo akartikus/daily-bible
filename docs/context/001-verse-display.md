@@ -1,37 +1,39 @@
-# Affichage d'un verset à la demande
+# Contexte : Affichage d'un verset à la demande (US1)
 
-## Description
+## Statut
+**Actif** — Implémenté, testé, validé
 
-Un clic sur l'icône de l'extension affiche un verset biblique complet
-(texte, référence, traduction) en moins de 3 secondes sur une connexion
-standard, sans aucune configuration préalable. Un clic suivant réaffiche le
-verset en cours, sans consommer un nouveau tirage.
+## Décisions d'implémentation
 
-## Feature et spécification liées
+### Architecture
+- **API externe** : Free Use Bible API (bible.helloao.org) — traduction Louis Segond 1910 (fra_lsg)
+- **Cache** : BookIndex mis en cache dans chrome.storage.local avec invalidation 30 jours
+- **Tirage aléatoire** : Livre pondéré par nombre total de versets, chapitre et verset uniformes
+- **Service worker** : Orchestration centralisée, état éphémère (MV3)
 
-- Feature : 001-biblical-pomodoro
-- [specs/001-biblical-pomodoro/spec.md](../../specs/001-biblical-pomodoro/spec.md) — User Story 1 (P1)
+### Composants
+- `VerseView.svelte` — Affichage texte + référence + traduction
+- `ErrorView.svelte` — Message d'erreur + bouton « Réessayer »
+- `verse.svelte.ts` — Store Svelte 5 (runes) pour le verset courant
 
-## Décisions techniques
+### Flux de données
+1. Clic sur l'icône → message `ensure-current-verse` au service worker
+2. Service worker vérifie `currentCycle.verse`
+3. Si null : tirage (BookIndex → livre pondéré → chapitre → extraction), écriture currentCycle, réponse
+4. Si présent : réponse immédiate (pas de nouveau tirage — FR-002)
+5. Popup affiche VerseView ou ErrorView selon le résultat
 
-- **Source des versets** : API publique
-  [Free Use Bible API](https://bible.helloao.org/) — gratuite, sans clé ni
-  compte ; endpoints `books.json` et `{book}/{chapter}.json`.
-- **Traduction** : Louis Segond 1910, ID `fra_lsg` (domaine public,
-  31 170 versets).
-- **Tirage aléatoire** : côté client — livre pondéré par
-  `totalNumberOfVerses`, chapitre et verset uniformes.
-- **Extraction du texte** : concaténation des chaînes et
-  `FormattedText.text`, références de notes exclues.
-- **Stack UI** : Svelte 5 + TypeScript strict + Tailwind CSS 4, popup
-  Manifest V3.
-- **Verset courant** : persisté dans `chrome.storage.local` (clé
-  `currentCycle`), écrit par le service worker uniquement.
+### Gestion d'erreurs
+- Timeout API : 10 secondes
+- Erreurs réseau/HTTP/JSON mappées vers type d'erreur utilisateur
+- Hors connexion : ErrorView avec « Réessayer » (FR-011)
+- Jamais d'écran vide
 
-## Points d'attention
+### Tests
+- 90 tests unitaires + composants passent
+- Scénarios quickstart 1, 2, 6 validés
 
-- Connexion internet requise ; timeout 10 s par requête, puis message clair
-  + action « Réessayer ».
-- Jamais d'écran vide : toute erreur de récupération est gracieuse (FR-011).
-- Le clic manuel ne remet pas le minuteur à zéro et n'affecte pas le tirage
-  (rythme fixe).
+### Performance
+- Verset affiché < 3 s après clic (SC-001)
+- Tirage aléatoire < 100 ms hors réseau
+- Bundle popup : 13.76 kB gzippé (cible < 300 kB)

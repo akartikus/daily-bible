@@ -1,30 +1,40 @@
-# Réglages et persistance
+# Contexte : Réglages simples et persistants (US3)
 
-## Description
+## Statut
+**Actif** — Implémenté, testé, validé
 
-L'utilisateur active ou désactive l'affichage automatique et définit
-l'intervalle en minutes (défaut 25). Les réglages s'appliquent au prochain
-cycle et sont conservés après un redémarrage du navigateur.
+## Décisions d'implémentation
 
-## Feature et spécification liées
+### Architecture
+- **Store Svelte 5** : `settings.svelte.ts` avec runes (`$state`, `$derived`, `$effect`)
+- **Persistance** : `chrome.storage.local` via wrapper typé (`src/shared/chrome/storage.ts`)
+- **Synchronisation** : Écoute `storage.onChanged` pour mise à jour multi-onglet/fenêtre
+- **Défauts** : Appliqués au chargement si clé absente
 
-- Feature : 001-biblical-pomodoro
-- [specs/001-biblical-pomodoro/spec.md](../../specs/001-biblical-pomodoro/spec.md) — User Story 3 (P3)
+### Réglages
+| Clé | Défaut | Contraintes |
+|-----|--------|-------------|
+| `autoDisplayEnabled` | `false` | booléen |
+| `intervalMinutes` | `25` | entier, 1 ≤ x ≤ 1440 |
+| `translationId` | `fra_lsg` | fixe v1 (Louis Segond 1910) |
 
-## Décisions techniques
+### Validation
+- `isValidIntervalMinutes(x)` : entier, 1 ≤ x ≤ 1440
+- Rejet : 0, négatifs, > 1440, non-entiers, non-numériques
+- Message d'erreur compréhensible, dernière valeur valide conservée (FR-008)
 
-- **Stockage** : `chrome.storage.local`, clé `settings` — disponible dans le
-  service worker, persiste après redémarrage.
-- **Défauts** : `autoDisplayEnabled = false`, `intervalMinutes = 25`,
-  `translationId = 'fra_lsg'`.
-- **Validation** : intervalle entier, 1 ≤ x ≤ 1440 ; toute saisie invalide
-  est refusée avec un message compréhensible et la dernière valeur valide
-  conservée.
-- **Application** : le service worker observe `storage.onChanged` et
-  recrée/supprime l'alarme en conséquence.
+### UI (SettingsView.svelte)
+- Interrupteur pour `autoDisplayEnabled` (état initial false)
+- Champ numérique pour `intervalMinutes` (bornes 1–1440)
+- Application immédiate : écriture storage → recréation alarme si auto activé
+- Navigation : bouton engrenage dans VerseView (≤ 2 interactions — FR-007/SC-003)
 
-## Points d'attention
+### Persistance
+- Redémarrage Chrome : réglages conservés (FR-006/SC-004)
+- Synchronisation via `storage.onChanged` entre popup et service worker
 
-- Budget d'interactions : afficher un verset ≤ 1, accéder aux réglages ≤ 2
-  depuis l'icône.
-- `window.localStorage` écarté : indisponible dans le service worker MV3.
+### Tests
+- Tests unitaires : settings.test.ts (défauts + validation intervalle), settings-store.test.ts
+- Tests composant : SettingsView.test.ts
+- 90 tests passent
+- Scénarios quickstart 3, 5 validés

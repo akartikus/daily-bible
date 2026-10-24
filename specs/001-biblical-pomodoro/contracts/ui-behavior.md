@@ -46,6 +46,14 @@ blocage. Si le tirage échoue (FR-011) : le popup affiche ErrorView avec
 existe, il reste affiché (dégradation gracieuse) et un nouveau tirage aura
 lieu à la prochaine échéance.
 
+## Invitation à prendre une pause
+
+**Décision** : Option A — L'ouverture automatique du popup EST l'invitation.
+Aucun libellé dédié dans VerseView. Le concept "pomodoro biblique" repose sur
+l'apparition du popup à intervalle régulier comme signal pour faire une pause
+et lire un verset. Cela évite une complexité d'UI inutile et reste fidèle au
+principe de simplicité (YAGNI).
+
 ## Hors périmètre v1
 
 Badge sur l'icône, choix de traduction dans l'UI, mode hors ligne,
