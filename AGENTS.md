@@ -65,6 +65,7 @@ Never cut: validation at trust boundaries, error handling that prevents data los
 - Indiquer les tests exécutés et leurs résultats.
 - Signaler ce qui a été ignoré ou non vérifié, ainsi que les risques connus.
 - Terminer par une ou deux lignes indiquant ce qui n'a pas été vérifié et les risques à connaître.
+- Si ça n'existe pas encore, crée un fichier docs/release-notes.md dans lequel on resumera ce qu'on a fait pour chaque tache. Pas de phrases longues ni de terme technique. 
 
 ## Documentation and Context7
 - For coding tasks, use Context7 to retrieve up-to-date documentation whenever you need library/API documentation, code generation, setup, or configuration guidance.
