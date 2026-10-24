@@ -2,9 +2,9 @@ import { defineManifest } from "@crxjs/vite-plugin";
 
 export default defineManifest({
   manifest_version: 3,
-  name: "Pomodoro Biblique",
+  name: "Selah Time - Christian Pomodoro timer.",
   description:
-    "Un verset biblique à chaque clic, ou à intervalle régulier comme un pomodoro.",
+    "Un Pomodoro classique mais avec un verset biblique à chaque changement de phase.",
   version: "0.1.0",
   minimum_chrome_version: "127",
   action: {

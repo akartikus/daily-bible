@@ -47,6 +47,7 @@ Never cut: validation at trust boundaries, error handling that prevents data los
 
 - Si la documentation de la feature ou de la tâche n'est pas encore répertoriée dans `docs/context`, ajouter le fichier `.md` pertinent et mettre à jour `docs/context/index.md`.
 - Après un changement architectural, proposer la mise à jour de la documentation concernée.
+- Les commentaires dans le code doivent être fait en Anglais courant, simple et court.
 - Cocher une tâche dans `tasks.md` uniquement après son implémentation et sa vérification.
 - Ne pas modifier les spécifications ou les tâches hors du périmètre demandé sans accord.
 - Le format des commits doit être quand c'est possible<numero-de-la-spec>-<numero-de-la-tâche>: <le-message-en-anglais>
