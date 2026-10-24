@@ -89,7 +89,7 @@ d'après spec.md) pour permettre implémentation et validation indépendantes.
 ### Tests for User Story 2
 
 - [X] T019 [P] [US2] Tests unitaires des réglages dans tests/unit/settings.test.ts : défauts (autoDisplayEnabled=false, intervalMinutes=25, translationId='fra_lsg') ; validation de l'intervalle « entier, 1 ≤ x ≤ 1440 » avec refus de 0, négatif, > 1440 (FR-004/FR-008) — RED d'abord
-- [ ] T020 [P] [US2] Tests unitaires de l'alarme dans tests/unit/alarms.test.ts : création avec periodInMinutes=intervalMinutes, suppression à la désactivation, re-création si absente au démarrage du service worker — per data-model.md (Alarm)
+- [X] T020 [P] [US2] Tests unitaires de l'alarme dans tests/unit/alarms.test.ts : création avec periodInMinutes=intervalMinutes, suppression à la désactivation, re-création si absente au démarrage du service worker — per data-model.md (Alarm)
 
 ### Implementation for User Story 2
 
