@@ -1,25 +1,62 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import ErrorView from "./components/ErrorView.svelte";
+  import SettingsView from "./components/SettingsView.svelte";
   import VerseView from "./components/VerseView.svelte";
+  import { SettingsStore } from "./lib/settings.svelte.ts";
   import { VerseStore } from "./lib/verse.svelte.ts";
 
   const store = new VerseStore();
+  const settingsStore = new SettingsStore();
   const verse = $derived(store.verse);
   const error = $derived(store.error);
+
+  // FR-007/SC-003 : verset ≤ 1 interaction, réglages ≤ 2 (engrenage).
+  let view = $state<"verse" | "settings">("verse");
 
   onMount(() => {
     void store.load();
     store.observe();
+    void settingsStore.load();
+    settingsStore.observe();
   });
 </script>
 
-{#if verse}
-  <VerseView {verse} />
-{:else if error}
-  <ErrorView message={error} onRetry={() => void store.load()} />
-{:else}
-  <main class="flex h-64 w-80 items-center justify-center">
-    <p class="text-lg">Chargement…</p>
-  </main>
-{/if}
+<div class="w-80">
+  <header class="flex h-9 items-center justify-end px-1">
+    {#if view === "verse"}
+      <button
+        type="button"
+        class="rounded px-2 text-gray-400 hover:text-gray-600"
+        aria-label="Réglages"
+        title="Réglages"
+        onclick={() => (view = "settings")}
+      >
+        ⚙
+      </button>
+    {:else}
+      <button
+        type="button"
+        class="rounded px-2 text-sm text-blue-600"
+        onclick={() => (view = "verse")}
+      >
+        Retour au verset
+      </button>
+    {/if}
+  </header>
+
+  {#if view === "settings"}
+    <SettingsView
+      settings={settingsStore.settings}
+      onChange={(settings) => void settingsStore.update(settings)}
+    />
+  {:else if verse}
+    <VerseView {verse} />
+  {:else if error}
+    <ErrorView message={error} onRetry={() => void store.load()} />
+  {:else}
+    <main class="flex h-64 w-80 items-center justify-center">
+      <p class="text-lg">Chargement…</p>
+    </main>
+  {/if}
+</div>
