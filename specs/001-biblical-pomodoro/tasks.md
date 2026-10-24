@@ -110,7 +110,7 @@ d'après spec.md) pour permettre implémentation et validation indépendantes.
 
 ### Implementation for User Story 3
 
-- [ ] T025 [P] [US3] Créer le store réglages dans src/popup/lib/settings.svelte.ts : chargement avec application des défauts si absent, écriture au changement, synchronisation via onChanged — per contracts/storage-schema.md + tests unitaires dans tests/unit/settings-store.test.ts
+- [X] T025 [P] [US3] Créer le store réglages dans src/popup/lib/settings.svelte.ts : chargement avec application des défauts si absent, écriture au changement, synchronisation via onChanged — per contracts/storage-schema.md + tests unitaires dans tests/unit/settings-store.test.ts
 - [ ] T026 [US3] Créer SettingsView.svelte dans src/popup/components/ + tests composant dans tests/component/SettingsView.test.ts : interrupteur autoDisplayEnabled (état initial false — FR-003), champ intervalle en minutes (défaut 25 — FR-004, bornes 1..1440), saisie invalide refusée avec message compréhensible et dernière valeur valide conservée (FR-008), application immédiate au prochain cycle (dépend de T021, T025)
 - [ ] T027 [US3] Ajouter la navigation réglages dans src/popup/App.svelte (bouton engrenage ; afficher un verset ≤ 1 interaction, accéder aux réglages ≤ 2 — FR-007/SC-003) et valider les scénarios 3 et 5 de quickstart.md (persistance après redémarrage — FR-006/SC-004)
 

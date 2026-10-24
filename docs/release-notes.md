@@ -35,3 +35,7 @@ Ce que chaque tâche a apporté, en une ligne courte.
 - T022 : le minuteur est créé, supprimé ou retrouvé selon les réglages.
 - T023 : la fenêtre s'ouvre seule ; un échec ne bloque rien.
 - T024 : à chaque échéance, la fenêtre s'ouvre avec un verset neuf ; en cas d'échec, l'ancien verset reste.
+
+## Réglages
+
+- T025 : la fenêtre garde les réglages à jour.
