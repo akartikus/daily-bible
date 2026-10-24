@@ -25,6 +25,13 @@ export default tseslint.config(
     },
   },
   {
+    // Dans les <script lang="ts"> des .svelte, TypeScript (via le parser
+    // @typescript-eslint ci-dessus) connaît les globals DOM ; no-undef ESLint
+    // les ignore et fausse-positiverait (Event, HTMLInputElement…).
+    files: ["**/*.svelte"],
+    rules: { "no-undef": "off" },
+  },
+  {
     rules: {
       // Aligné sur noUnusedParameters (tsc) : les paramètres préfixés `_` sont ignorés.
       "@typescript-eslint/no-unused-vars": [

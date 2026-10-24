@@ -39,3 +39,4 @@ Ce que chaque tâche a apporté, en une ligne courte.
 ## Réglages
 
 - T025 : la fenêtre garde les réglages à jour.
+- T026 : écran de réglages : interrupteur d'affichage auto et intervalle en minutes ; une saisie impossible est refusée avec un message.
