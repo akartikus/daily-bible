@@ -8,6 +8,7 @@
 import { get, onChanged, set } from "../../shared/chrome/storage";
 import {
   DEFAULT_SETTINGS,
+  readSettings,
   type Settings,
 } from "../../shared/settings/defaults";
 
@@ -16,8 +17,8 @@ export class SettingsStore {
 
   /** Lecture des réglages ; défauts appliqués si absents. */
   async load(): Promise<void> {
-    const stored = await get<Settings>("settings");
-    this.settings = stored ?? { ...DEFAULT_SETTINGS };
+    const stored = await get<Partial<Settings>>("settings");
+    this.settings = readSettings(stored);
   }
 
   /** Écrit les réglages dans storage.local et met l'état à jour. */
@@ -29,9 +30,10 @@ export class SettingsStore {
   /** Observe les écritures externes pendant l'ouverture du popup. */
   observe(): void {
     onChanged((changes) => {
-      const settings = changes.settings?.newValue as Settings | undefined;
+      const settings = changes.settings?.newValue as
+        Partial<Settings> | undefined;
       if (settings) {
-        this.settings = settings;
+        this.settings = readSettings(settings);
       }
     });
   }

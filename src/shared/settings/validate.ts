@@ -1,7 +1,5 @@
 /**
- * Validation de l'intervalle — data-model.md, contrainte verbatim :
- * « entier, 1 ≤ x ≤ 1440 » (FR-004/FR-008). Toute valeur invalide est
- * refusée et la dernière valeur valide est conservée (edge case spec).
+ * Validation helpers for the existing interval and pomodoro duration limits.
  */
 
 export function isValidIntervalMinutes(intervalMinutes: number): boolean {
@@ -10,4 +8,14 @@ export function isValidIntervalMinutes(intervalMinutes: number): boolean {
     intervalMinutes >= 1 &&
     intervalMinutes <= 1440
   );
+}
+
+/** Validates a pomodoro duration: an integer from 1 to 1440 minutes. */
+export function isValidPomodoroMinutes(minutes: number): boolean {
+  return Number.isInteger(minutes) && minutes >= 1 && minutes <= 1440;
+}
+
+/** Validates the repetition count: an integer from 1 to 10. */
+export function isValidRepetitionCount(repetitions: number): boolean {
+  return Number.isInteger(repetitions) && repetitions >= 1 && repetitions <= 10;
 }

@@ -36,15 +36,18 @@ describe("store des réglages (T025 — contracts/storage-schema.md)", () => {
 
     await store.load();
 
-    expect(store.settings).toEqual(stored);
+    expect(store.settings).toEqual({
+      ...DEFAULT_SETTINGS,
+      ...stored,
+    });
   });
 
   it("update : écrit les réglages dans storage.local", async () => {
     const store = new SettingsStore();
     const next = {
+      ...DEFAULT_SETTINGS,
       autoDisplayEnabled: true,
       intervalMinutes: 60,
-      translationId: "fra_lsg",
     };
 
     await store.update(next);
@@ -58,9 +61,9 @@ describe("store des réglages (T025 — contracts/storage-schema.md)", () => {
     store.observe();
 
     const next = {
+      ...DEFAULT_SETTINGS,
       autoDisplayEnabled: true,
       intervalMinutes: 30,
-      translationId: "fra_lsg",
     };
     await set("settings", next);
 

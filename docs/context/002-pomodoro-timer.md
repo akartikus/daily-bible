@@ -1,8 +1,9 @@
 # Contexte : Minuteur Pomodoro (002)
 
 ## Statut
-**Planifié (tâches générées)** — Spec clarifiée, plan et tasks.md prêts ;
-prochaine étape : `/speckit-implement`.
+**En cours (fondations T001–T006 terminées)** — Spec clarifiée, plan et
+tasks.md prêts ; les fondations partagées sont implémentées et vérifiées.
+Les stories d'interface et d'orchestration restent à réaliser.
 
 ## Périmètre (specs/002-pomodoro-timer/spec.md)
 

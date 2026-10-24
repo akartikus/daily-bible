@@ -23,7 +23,7 @@ type StorageListener = (
   areaName: string,
 ) => void;
 
-type Alarm = { name: string; periodInMinutes?: number };
+type Alarm = { name: string; periodInMinutes?: number; when?: number };
 
 type AlarmListener = (alarm: Alarm) => void;
 
@@ -111,10 +111,16 @@ export function createChromeMock(): ChromeMock {
     },
     alarms: {
       create: vi.fn(
-        (name: string, alarmInfo: { periodInMinutes?: number }): void => {
+        (
+          name: string,
+          alarmInfo: { periodInMinutes?: number; when?: number },
+        ): void => {
           alarms.set(name, {
             name,
-            periodInMinutes: alarmInfo.periodInMinutes,
+            ...(alarmInfo.periodInMinutes === undefined
+              ? {}
+              : { periodInMinutes: alarmInfo.periodInMinutes }),
+            ...(alarmInfo.when === undefined ? {} : { when: alarmInfo.when }),
           });
         },
       ),
@@ -198,7 +204,11 @@ export function createChromeMock(): ChromeMock {
   return {
     chrome: chromeMock as unknown as typeof chrome,
     fireAlarm(name: string): void {
-      const alarm = alarms.get(name) ?? { name, periodInMinutes: undefined };
+      const alarm = alarms.get(name) ?? {
+        name,
+        periodInMinutes: undefined,
+        when: undefined,
+      };
       for (const listener of alarmListeners) {
         listener(alarm);
       }

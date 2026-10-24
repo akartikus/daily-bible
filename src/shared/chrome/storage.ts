@@ -1,10 +1,10 @@
 /**
- * Wrapper mince autour de `chrome.storage.local`. Clés et formes des valeurs :
- * contracts/storage-schema.md (settings, currentCycle, bookIndex). Isolé pour
- * la testabilité (constitution IV) — les tests stubbent le global `chrome`.
+ * Thin wrapper around `chrome.storage.local` for the keys and value shapes in
+ * contracts/storage-schema.md. Tests stub the global `chrome` object.
  */
 
-export type StorageKey = "settings" | "currentCycle" | "bookIndex";
+export type StorageKey =
+  "settings" | "currentCycle" | "bookIndex" | "pomodoroState";
 
 export interface StorageChange {
   oldValue?: unknown;

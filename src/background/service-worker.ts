@@ -13,17 +13,9 @@
  *   (dégradation gracieuse — contracts/ui-behavior.md).
  */
 
-import {
-  BibleApiError,
-  fetchBookIndex,
-  fetchChapter,
-} from "../shared/bible/api";
-import { extractVerse, type Verse } from "../shared/bible/extract";
-import {
-  pickUniformChapterNumber,
-  pickUniformVerseNumber,
-  pickWeightedBook,
-} from "../shared/bible/random";
+import { BibleApiError } from "../shared/bible/api";
+import { drawRandomVerse } from "../shared/bible/draw";
+import type { Verse } from "../shared/bible/extract";
 import { openPopup } from "../shared/chrome/action";
 import {
   ALARM_NAME,
@@ -33,10 +25,7 @@ import {
 } from "../shared/chrome/alarms";
 import { onMessage } from "../shared/chrome/runtime";
 import { get, onChanged, set } from "../shared/chrome/storage";
-import { DEFAULT_SETTINGS, type Settings } from "../shared/settings/defaults";
-
-const TRANSLATION_ID = "fra_lsg";
-const TRANSLATION_NAME = "Louis Segond 1910";
+import { readSettings, type Settings } from "../shared/settings/defaults";
 
 export interface EnsureCurrentVerseRequest {
   type: "ensure-current-verse";
@@ -73,8 +62,9 @@ onChanged((changes) => {
   if (!changes.settings) {
     return;
   }
-  const settings =
-    (changes.settings.newValue as Settings | undefined) ?? DEFAULT_SETTINGS;
+  const settings = readSettings(
+    changes.settings.newValue as Partial<Settings> | undefined,
+  );
   if (settings.autoDisplayEnabled) {
     createVerseIntervalAlarm(settings.intervalMinutes);
   } else {
@@ -92,7 +82,8 @@ chrome.alarms.onAlarm.addListener((alarm) => {
 });
 
 async function ensureAlarmFromSettings(): Promise<void> {
-  const settings = (await get<Settings>("settings")) ?? DEFAULT_SETTINGS;
+  const stored = await get<Partial<Settings>>("settings");
+  const settings = readSettings(stored);
   if (settings.autoDisplayEnabled) {
     await ensureVerseIntervalAlarm(settings.intervalMinutes);
   }
@@ -108,21 +99,6 @@ async function onVerseInterval(): Promise<void> {
     // verset en cours, le popup affichera ErrorView via ensure-current-verse.
     console.warn("Tirage à l'échéance de l'alarme échoué :", error);
   }
-}
-
-async function drawRandomVerse(): Promise<Verse> {
-  const bookIndex = await fetchBookIndex(TRANSLATION_ID);
-  const book = pickWeightedBook(bookIndex.books);
-  const chapter = await fetchChapter(
-    TRANSLATION_ID,
-    book.id,
-    pickUniformChapterNumber(book),
-  );
-  return extractVerse(
-    chapter,
-    pickUniformVerseNumber(chapter.numberOfVerses),
-    TRANSLATION_NAME,
-  );
 }
 
 async function ensureCurrentVerse(): Promise<EnsureCurrentVerseResponse> {

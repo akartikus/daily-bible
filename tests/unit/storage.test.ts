@@ -34,6 +34,18 @@ describe("wrapper chrome.storage.local", () => {
     expect(chrome.storage.local.set).toHaveBeenCalledWith({ bookIndex });
   });
 
+  it("permet de stocker et relire l'état pomodoro", async () => {
+    const pomodoroState = {
+      status: "focus",
+      repetition: 1,
+      running: true,
+      phaseEndsAt: 2_000,
+      phaseRemainingMs: null,
+    };
+    await set("pomodoroState", pomodoroState);
+    expect(await get("pomodoroState")).toEqual(pomodoroState);
+  });
+
   it("onChanged reçoit oldValue et newValue de la zone local", async () => {
     const listener = vi.fn();
     onChanged(listener);

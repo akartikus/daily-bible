@@ -1,6 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { DEFAULT_SETTINGS } from "../../src/shared/settings/defaults";
-import { isValidIntervalMinutes } from "../../src/shared/settings/validate";
+import {
+  DEFAULT_SETTINGS,
+  readSettings,
+} from "../../src/shared/settings/defaults";
+import {
+  isValidIntervalMinutes,
+  isValidPomodoroMinutes,
+  isValidRepetitionCount,
+} from "../../src/shared/settings/validate";
 
 describe("DEFAULT_SETTINGS (défauts — data-model.md)", () => {
   it("désactive l'affichage automatique (opt-in explicite — FR-003)", () => {
@@ -13,6 +20,78 @@ describe("DEFAULT_SETTINGS (défauts — data-model.md)", () => {
 
   it("fixe la traduction à fra_lsg (v1, non exposée dans l'UI)", () => {
     expect(DEFAULT_SETTINGS.translationId).toBe("fra_lsg");
+  });
+
+  it("fixe les durées pomodoro à 25 / 5 / 15 minutes et X à 4", () => {
+    expect(DEFAULT_SETTINGS.focusMinutes).toBe(25);
+    expect(DEFAULT_SETTINGS.breakMinutes).toBe(5);
+    expect(DEFAULT_SETTINGS.longBreakMinutes).toBe(15);
+    expect(DEFAULT_SETTINGS.repetitionsBeforeLongBreak).toBe(4);
+  });
+});
+
+describe("readSettings (migration des réglages 001)", () => {
+  it("complète les réglages 001 avec les défauts pomodoro", () => {
+    expect(
+      readSettings({
+        autoDisplayEnabled: true,
+        intervalMinutes: 10,
+        translationId: "fra_lsg",
+      }),
+    ).toEqual({
+      ...DEFAULT_SETTINGS,
+      autoDisplayEnabled: true,
+      intervalMinutes: 10,
+    });
+  });
+
+  it("conserve les valeurs pomodoro déjà stockées", () => {
+    expect(
+      readSettings({
+        focusMinutes: 40,
+        breakMinutes: 8,
+        longBreakMinutes: 20,
+        repetitionsBeforeLongBreak: 3,
+      }),
+    ).toEqual({
+      ...DEFAULT_SETTINGS,
+      focusMinutes: 40,
+      breakMinutes: 8,
+      longBreakMinutes: 20,
+      repetitionsBeforeLongBreak: 3,
+    });
+  });
+});
+
+describe("isValidPomodoroMinutes (entier, 1 ≤ x ≤ 1440)", () => {
+  it("accepte les bornes et les valeurs entières", () => {
+    expect(isValidPomodoroMinutes(1)).toBe(true);
+    expect(isValidPomodoroMinutes(1440)).toBe(true);
+    expect(isValidPomodoroMinutes(25)).toBe(true);
+  });
+
+  it("refuse les valeurs invalides", () => {
+    expect(isValidPomodoroMinutes(0)).toBe(false);
+    expect(isValidPomodoroMinutes(-1)).toBe(false);
+    expect(isValidPomodoroMinutes(1441)).toBe(false);
+    expect(isValidPomodoroMinutes(25.5)).toBe(false);
+    expect(isValidPomodoroMinutes(NaN)).toBe(false);
+  });
+});
+
+describe("isValidRepetitionCount (entier, 1 ≤ x ≤ 10)", () => {
+  it("accepte les bornes et les valeurs entières", () => {
+    expect(isValidRepetitionCount(1)).toBe(true);
+    expect(isValidRepetitionCount(10)).toBe(true);
+    expect(isValidRepetitionCount(4)).toBe(true);
+  });
+
+  it("refuse les valeurs invalides", () => {
+    expect(isValidRepetitionCount(0)).toBe(false);
+    expect(isValidRepetitionCount(-1)).toBe(false);
+    expect(isValidRepetitionCount(11)).toBe(false);
+    expect(isValidRepetitionCount(4.5)).toBe(false);
+    expect(isValidRepetitionCount(NaN)).toBe(false);
   });
 });
 

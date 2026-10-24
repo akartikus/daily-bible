@@ -54,4 +54,24 @@ describe("wrapper chrome.alarms (Alarm — data-model.md)", () => {
     await ensureVerseIntervalAlarm(25);
     expect(chrome.alarms.create).toHaveBeenCalledTimes(1);
   });
+
+  it("le mock propage l'échéance d'une alarme unique", async () => {
+    const listener = vi.fn();
+    chrome.alarms.onAlarm.addListener(listener);
+
+    chrome.alarms.create("pomodoro-phase", { when: 1_000 });
+
+    expect(await chrome.alarms.get("pomodoro-phase")).toEqual({
+      name: "pomodoro-phase",
+      when: 1_000,
+    });
+    expect(await chrome.alarms.getAll()).toEqual([
+      { name: "pomodoro-phase", when: 1_000 },
+    ]);
+    mock.fireAlarm("pomodoro-phase");
+    expect(listener).toHaveBeenCalledWith({
+      name: "pomodoro-phase",
+      when: 1_000,
+    });
+  });
 });
