@@ -3,7 +3,7 @@ import tseslint from "typescript-eslint";
 import svelte from "eslint-plugin-svelte";
 
 export default tseslint.config(
-  { ignores: ["dist", "node_modules", "coverage", "scripts"] },
+  { ignores: ["dist", "node_modules", "coverage"] },
   js.configs.recommended,
   ...tseslint.configs.recommended,
   ...svelte.configs["flat/recommended"],
@@ -30,6 +30,15 @@ export default tseslint.config(
     // les ignore et fausse-positiverait (Event, HTMLInputElement…).
     files: ["**/*.svelte"],
     rules: { "no-undef": "off" },
+  },
+  {
+    files: ["scripts/**/*.mjs"],
+    languageOptions: {
+      globals: {
+        console: "readonly",
+        process: "readonly",
+      },
+    },
   },
   {
     rules: {

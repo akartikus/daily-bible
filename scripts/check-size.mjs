@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-// Check that popup bundle size is under 300 kB gzipped
 
 import { gzipSync } from "node:zlib";
 import { readFileSync, readdirSync } from "node:fs";
@@ -11,7 +10,6 @@ const MAX_SIZE_KB = 300;
 function main() {
   try {
     const files = readdirSync(DIST_DIR);
-    // Find the main popup JS bundle (index.html-*.js)
     const popupBundle = files.find(
       (f) => f.startsWith("index.html-") && f.endsWith(".js"),
     );
