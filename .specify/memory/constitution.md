@@ -52,16 +52,15 @@ Build the simplest solution that satisfies the current spec.
 
 ### IV. Testability as a Design Constraint
 
-If it cannot be tested through its public interface, the design is wrong.
+Si une fonctionnalité critique ne peut pas être testée à travers son interface publique, la conception est à revoir.
 
-- Every feature MUST ship with tests that verify the behavior described in
-  its spec; tests are part of the definition of done, not an afterthought.
+- Ciblage des composants sensibles : Les tests ne sont pas obligatoires pour la moindre fonctionnalité secondaire. En revanche, ils doivent impérativement couvrir les fonctionnalités critiques, les parcours utilisateurs sensibles et la logique métier complexe.
 
-- Tests MUST be deterministic, independent, and named after the behavior they
-  verify.
+- Intégration au "Definition of Done" (DoD) : Pour les fonctionnalités critiques, les tests font partie intégrante de la livraison et doivent vérifier fidèlement le comportement décrit dans la spécification.
 
-- Linting, formatting, type checking, and tests MUST pass before any merge;
-  CI enforces these gates.
+- Qualité des tests : Lorsqu'ils sont mis en place, les tests MUST (doivent) être déterministes, indépendants et nommés explicitement d'après le comportement précis qu'ils vérifient.
+
+- Portes de validation (CI) : Le linter, le formatage, le typage et la suite de tests (sur les zones critiques) MUST (doivent) passer avec succès avant tout merge.
 
 ### V. Consistency & Maintainability
 
