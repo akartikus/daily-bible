@@ -1,9 +1,10 @@
 # Contexte : Minuteur Pomodoro (002)
 
 ## Statut
-**En cours (fondations T001–T006 terminées)** — Spec clarifiée, plan et
-tasks.md prêts ; les fondations partagées sont implémentées et vérifiées.
-Les stories d'interface et d'orchestration restent à réaliser.
+**Actif** — Les cinq stories sont implémentées et vérifiées (T001–T025).
+Les 9 scénarios de `specs/002-pomodoro-timer/quickstart.md` ont été validés
+manuellement dans Chrome ≥ 127 le 2026-10-26
+([002-validation.md](002-validation.md)).
 
 ## Périmètre (specs/002-pomodoro-timer/spec.md)
 
@@ -33,6 +34,16 @@ Les stories d'interface et d'orchestration restent à réaliser.
   à la fin de chaque focus.
 - `settings` étendu (4 champs) avec fusion des défauts à la lecture
   (`readSettings`) — migration invisible des installations 001.
+- L'orchestrateur relit les réglages stockés à chaque transition
+  (`currentSettings()` dans `background/pomodoro.ts`) : la phase en cours
+  garde sa durée, les nouvelles valeurs s'appliquent à partir de la phase
+  suivante (FR-012). Aucun listener ne recrée l'alarme pomodoro à l'écriture
+  des réglages.
+- `PomodoroStatus` est rendu par `App.svelte` au-dessus du contenu
+  verset/erreur/chargement : le statut reste visible en toutes circonstances
+  dans la vue verset (FR-002).
+- `onChanged` (`shared/chrome/storage.ts`) rend une fonction d'arrêt
+  d'observation, utilisée par le store pomodoro (`destroy()`).
 - Suspension : `phaseRemainingMs` figé à la pause, recalcul de `phaseEndsAt`
   à la reprise. Redémarrage navigateur : nouveau cycle (onStartup).
 - L'affichage automatique à intervalle de la feature 001 reste inchangé et

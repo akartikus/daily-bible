@@ -57,12 +57,12 @@ existent (feature 001) ; aucune nouvelle dépendance, manifeste inchangé
 
 ### Implementation for User Story 1
 
-- [ ] T007 [P] [US1] Étendre src/shared/chrome/alarms.ts : `POMODORO_ALARM_NAME = "pomodoro-phase"`, `createPomodoroPhaseAlarm(phaseEndsAt)` (one-shot `{ when }`), `clearPomodoroPhaseAlarm()` + tests étendus dans tests/unit/alarms.test.ts
-- [ ] T008 [P] [US1] Tests orchestrateur RED dans tests/unit/pomodoro-orchestrator.test.ts (import de src/background/service-worker, mock chrome, fireStartup/fireInstalled/fireAlarm) : onInstalled initialise `pomodoroState` si absent (focus, répétition 1, lecture, alarme créée `{ when: phaseEndsAt }`) ; onStartup remet un nouveau cycle (FR-013) ; `pomodoro-get-state` répond l'état et initialise défensivement si absent ; focus échu non alarmé → état réconcilié (SC-001)
-- [ ] T009 [US1] Implémenter src/background/pomodoro.ts : `registerPomodoro()` — cycle de vie (onInstalled init si absent, onStartup reset + alarme recréée), handler `pomodoro-get-state` (init défensive + `reconcilePomodoro`, réponse = PomodoroState), création/suppression de l'alarme via T007 ; types de messages exportés ; brancher `registerPomodoro()` dans src/background/service-worker.ts et adapter tests/unit/service-worker.test.ts (l'alarme pomodoro-phase est désormais créée au démarrage même si l'affichage auto est désactivé) (dépend de T001–T008)
-- [ ] T010 [P] [US1] Créer le store src/popup/lib/pomodoro.svelte.ts : `PomodoroStore` — chargement via message `pomodoro-get-state`, observation `onChanged` sur `pomodoroState`, erreur minimale affichable (jamais d'écran vide) + tests unitaires dans tests/unit/pomodoro-store.test.ts (dépend de T009 pour les types)
-- [ ] T011 [P] [US1] Créer src/popup/components/PomodoroStatus.svelte : libellé du statut (Focus / Pause / Longue pause), barre à X segments (accomplis remplis, courant distinct, pleine en longue pause, X = 1 → un segment), texte « répétition n / X » — FR-002/FR-003, contracts/ui-behavior.md (X vient du store réglages existant) + tests composant dans tests/component/PomodoroStatus.test.ts
-- [ ] T012 [US1] Câbler src/popup/App.svelte : instancier PomodoroStore, rendre PomodoroStatus dans la vue verset AU-DESSUS du contenu verset/erreur/chargement (FR-002 « en permanence ») ; valider le scénario 1 de quickstart.md (dépend de T010, T011)
+- [X] T007 [P] [US1] Étendre src/shared/chrome/alarms.ts : `POMODORO_ALARM_NAME = "pomodoro-phase"`, `createPomodoroPhaseAlarm(phaseEndsAt)` (one-shot `{ when }`), `clearPomodoroPhaseAlarm()` + tests étendus dans tests/unit/alarms.test.ts
+- [X] T008 [P] [US1] Tests orchestrateur RED dans tests/unit/pomodoro-orchestrator.test.ts (import de src/background/service-worker, mock chrome, fireStartup/fireInstalled/fireAlarm) : onInstalled initialise `pomodoroState` si absent (focus, répétition 1, lecture, alarme créée `{ when: phaseEndsAt }`) ; onStartup remet un nouveau cycle (FR-013) ; `pomodoro-get-state` répond l'état et initialise défensivement si absent ; focus échu non alarmé → état réconcilié (SC-001)
+- [X] T009 [US1] Implémenter src/background/pomodoro.ts : `registerPomodoro()` — cycle de vie (onInstalled init si absent, onStartup reset + alarme recréée), handler `pomodoro-get-state` (init défensive + `reconcilePomodoro`, réponse = PomodoroState), création/suppression de l'alarme via T007 ; types de messages exportés ; brancher `registerPomodoro()` dans src/background/service-worker.ts et adapter tests/unit/service-worker.test.ts (l'alarme pomodoro-phase est désormais créée au démarrage même si l'affichage auto est désactivé) (dépend de T001–T008)
+- [X] T010 [P] [US1] Créer le store src/popup/lib/pomodoro.svelte.ts : `PomodoroStore` — chargement via message `pomodoro-get-state`, observation `onChanged` sur `pomodoroState`, erreur minimale affichable (jamais d'écran vide) + tests unitaires dans tests/unit/pomodoro-store.test.ts (dépend de T009 pour les types)
+- [X] T011 [P] [US1] Créer src/popup/components/PomodoroStatus.svelte : libellé du statut (Focus / Pause / Longue pause), barre à X segments (accomplis remplis, courant distinct, pleine en longue pause, X = 1 → un segment), texte « répétition n / X » — FR-002/FR-003, contracts/ui-behavior.md (X vient du store réglages existant) + tests composant dans tests/component/PomodoroStatus.test.ts
+- [X] T012 [US1] Câbler src/popup/App.svelte : instancier PomodoroStore, rendre PomodoroStatus dans la vue verset AU-DESSUS du contenu verset/erreur/chargement (FR-002 « en permanence ») ; valider le scénario 1 de quickstart.md (dépend de T010, T011)
 
 **Checkpoint**: MVP fonctionnel — le statut du pomodoro est visible et correct
 
@@ -76,8 +76,8 @@ existent (feature 001) ; aucune nouvelle dépendance, manifeste inchangé
 
 ### Implementation for User Story 2
 
-- [ ] T013 [US2] Tests orchestrateur RED dans tests/unit/pomodoro-orchestrator.test.ts : fireAlarm(pomodoro-phase) en focus → openPopup, verset neuf dans currentCycle, `advanceAfterFocusEnd` (break si répétition < X, longBreak sinon), nouvelle alarme `{ when }` ; échec du tirage → transition quand même, ancien verset conservé (FR-014) ; alarme `verse-interval` ignorée par le dispatch pomodoro
-- [ ] T014 [US2] Implémenter la branche focus de l'alarme dans src/background/pomodoro.ts : dispatch par nom d'alarme ; openPopup non bloquant → `drawRandomVerse` → écriture currentCycle (dégradation gracieuse) → `advanceAfterFocusEnd` → alarme suivante (dépend de T009, T013) ; valider les scénarios 2 et 4 (partie statut) de quickstart.md
+- [X] T013 [US2] Tests orchestrateur RED dans tests/unit/pomodoro-orchestrator.test.ts : fireAlarm(pomodoro-phase) en focus → openPopup, verset neuf dans currentCycle, `advanceAfterFocusEnd` (break si répétition < X, longBreak sinon), nouvelle alarme `{ when }` ; échec du tirage → transition quand même, ancien verset conservé (FR-014) ; alarme `verse-interval` ignorée par le dispatch pomodoro
+- [X] T014 [US2] Implémenter la branche focus de l'alarme dans src/background/pomodoro.ts : dispatch par nom d'alarme ; openPopup non bloquant → `drawRandomVerse` → écriture currentCycle (dégradation gracieuse) → `advanceAfterFocusEnd` → alarme suivante (dépend de T009, T013) ; valider les scénarios 2 et 4 (partie statut) de quickstart.md
 
 **Checkpoint**: Le pomodoro biblique bat — verset neuf et pause automatique à chaque fin de focus
 
@@ -91,9 +91,9 @@ existent (feature 001) ; aucune nouvelle dépendance, manifeste inchangé
 
 ### Implementation for User Story 3
 
-- [ ] T015 [US3] Tests orchestrateur RED dans tests/unit/pomodoro-orchestrator.test.ts : fireAlarm en break/longBreak → openPopup seul (repop FR-007), statut inchangé, aucune nouvelle alarme ; message `pomodoro-next` → `startNextFocus` (break → répétition + 1, longBreak → répétition 1), lecture, alarme recréée ; next ignoré en focus ; next pendant une pause suspendue → focus en lecture (edge case spec)
-- [ ] T016 [US3] Implémenter la branche break/longBreak de l'alarme (openPopup seul) et le message `pomodoro-next` dans src/background/pomodoro.ts (dépend de T014, T015)
-- [ ] T017 [P] [US3] Ajouter le bouton next dans src/popup/components/PomodoroStatus.svelte (visible en Pause / Longue pause uniquement — FR-005) et l'action dans src/popup/lib/pomodoro.svelte.ts (message `pomodoro-next`) + tests composant étendus ; valider les scénarios 3, 4 et 6 (dépend de T016)
+- [X] T015 [US3] Tests orchestrateur RED dans tests/unit/pomodoro-orchestrator.test.ts : fireAlarm en break/longBreak → openPopup seul (repop FR-007), statut inchangé, aucune nouvelle alarme ; message `pomodoro-next` → `startNextFocus` (break → répétition + 1, longBreak → répétition 1), lecture, alarme recréée ; next ignoré en focus ; next pendant une pause suspendue → focus en lecture (edge case spec)
+- [X] T016 [US3] Implémenter la branche break/longBreak de l'alarme (openPopup seul) et le message `pomodoro-next` dans src/background/pomodoro.ts (dépend de T014, T015)
+- [X] T017 [P] [US3] Ajouter le bouton next dans src/popup/components/PomodoroStatus.svelte (visible en Pause / Longue pause uniquement — FR-005) et l'action dans src/popup/lib/pomodoro.svelte.ts (message `pomodoro-next`) + tests composant étendus ; valider les scénarios 3, 4 et 6 (dépend de T016)
 
 **Checkpoint**: Le cycle se referme — l'utilisateur décide quand reprendre le focus
 
@@ -107,9 +107,9 @@ existent (feature 001) ; aucune nouvelle dépendance, manifeste inchangé
 
 ### Implementation for User Story 4
 
-- [ ] T018 [P] [US4] Tests orchestrateur RED dans tests/unit/pomodoro-orchestrator.test.ts : `pomodoro-pause` → `suspendPomodoro`, alarme supprimée, invariants respectés ; `pomodoro-resume` → `resumePomodoro`, alarme recréée `{ when: now + phaseRemainingMs }` ; reprise d'une pause à décompte terminé → aucune alarme (attente de next) ; pause/play valables dans toute phase (FR-004)
-- [ ] T019 [US4] Implémenter les messages `pomodoro-pause` / `pomodoro-resume` dans src/background/pomodoro.ts (dépend de T016, T018)
-- [ ] T020 [US4] Ajouter le bouton play/pause dans src/popup/components/PomodoroStatus.svelte (action opposée à l'état : pause si lecture — défaut, play si suspendu — FR-004) et les actions dans src/popup/lib/pomodoro.svelte.ts + tests composant ; valider le scénario 5 (dépend de T017, T019)
+- [x] T018 [P] [US4] Tests orchestrateur RED dans tests/unit/pomodoro-orchestrator.test.ts : `pomodoro-pause` → `suspendPomodoro`, alarme supprimée, invariants respectés ; `pomodoro-resume` → `resumePomodoro`, alarme recréée `{ when: now + phaseRemainingMs }` ; reprise d'une pause à décompte terminé → aucune alarme (attente de next) ; pause/play valables dans toute phase (FR-004)
+- [x] T019 [US4] Implémenter les messages `pomodoro-pause` / `pomodoro-resume` dans src/background/pomodoro.ts (dépend de T016, T018)
+- [x] T020 [US4] Ajouter le bouton play/pause dans src/popup/components/PomodoroStatus.svelte (action opposée à l'état : pause si lecture — défaut, play si suspendu — FR-004) et les actions dans src/popup/lib/pomodoro.svelte.ts + tests composant ; valider le scénario 5 (dépend de T017, T019)
 
 **Checkpoint**: Minuteur pleinement contrôlable — suspension fidèle dans toute phase
 
@@ -123,8 +123,8 @@ existent (feature 001) ; aucune nouvelle dépendance, manifeste inchangé
 
 ### Implementation for User Story 5
 
-- [ ] T021 [P] [US5] Étendre src/popup/components/SettingsView.svelte : champs Focus / Pause / Longue pause (minutes, bornes 1..1440) et Répétitions avant longue pause (1..10), validation à la saisie via `isValidPomodoroMinutes` / `isValidRepetitionCount` (T003), messages « Entrez un nombre entier entre 1 et 1440. » / « Entrez un nombre entier entre 1 et 10. », dernière valeur valide conservée (FR-011) + tests composant étendus dans tests/component/SettingsView.test.ts — ne dépend que de T003 : peut avancer en parallèle des stories 1–4
-- [ ] T022 [US5] Valider les scénarios 7 et 8 de quickstart.md et vérifier FR-012 : un changement de durée en cours de phase ne recrée pas l'alarme courante ; les nouvelles valeurs s'appliquent à partir de la phase suivante (l'orchestrateur relit `readSettings` à chaque transition — research.md §6)
+- [x] T021 [P] [US5] Étendre src/popup/components/SettingsView.svelte : champs Focus / Pause / Longue pause (minutes, bornes 1..1440) et Répétitions avant longue pause (1..10), validation à la saisie via `isValidPomodoroMinutes` / `isValidRepetitionCount` (T003), messages « Entrez un nombre entier entre 1 et 1440. » / « Entrez un nombre entier entre 1 et 10. », dernière valeur valide conservée (FR-011) + tests composant étendus dans tests/component/SettingsView.test.ts — ne dépend que de T003 : peut avancer en parallèle des stories 1–4
+- [x] T022 [US5] Valider les scénarios 7 et 8 de quickstart.md et vérifier FR-012 : un changement de durée en cours de phase ne recrée pas l'alarme courante ; les nouvelles valeurs s'appliquent à partir de la phase suivante (l'orchestrateur relit `readSettings` à chaque transition — research.md §6)
 
 **Checkpoint**: Expérience complète — les cinq stories fonctionnent indépendamment
 
@@ -134,9 +134,9 @@ existent (feature 001) ; aucune nouvelle dépendance, manifeste inchangé
 
 **Purpose**: Améliorations transversales aux cinq stories
 
-- [ ] T023 Exécuter les portes qualité de package.json : npm run check, npm run test, npm run lint, npm run format, npm run build, npm run check:size (bundle < 300 Ko gzippé) ; corriger tout échec dans les fichiers concernés (constitution — CI rouge bloque)
-- [ ] T024 Valider les 9 scénarios de specs/002-pomodoro-timer/quickstart.md dans Chrome ≥ 127 (dist/ chargé non empaqueté) et consigner les résultats dans docs/context/002-validation.md + mise à jour de docs/context/index.md (règle projet)
-- [ ] T025 Mettre à jour la documentation : docs/context/002-pomodoro-timer.md (statut Actif, décisions finales), docs/context/index.md et docs/release-notes.md (une ligne courte par tâche, style existant — règle projet)
+- [x] T023 Exécuter les portes qualité de package.json : npm run check, npm run test, npm run lint, npm run format, npm run build, npm run check:size (bundle < 300 Ko gzippé) ; corriger tout échec dans les fichiers concernés (constitution — CI rouge bloque)
+- [x] T024 Valider les 9 scénarios de specs/002-pomodoro-timer/quickstart.md dans Chrome ≥ 127 (dist/ chargé non empaqueté) et consigner les résultats dans docs/context/002-validation.md + mise à jour de docs/context/index.md (règle projet)
+- [x] T025 Mettre à jour la documentation : docs/context/002-pomodoro-timer.md (statut Actif, décisions finales), docs/context/index.md et docs/release-notes.md (une ligne courte par tâche, style existant — règle projet)
 
 ---
 
