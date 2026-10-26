@@ -25,11 +25,18 @@ export async function set<T>(key: StorageKey, value: T): Promise<void> {
   await chrome.storage.local.set({ [key]: value });
 }
 
-/** Observe les changements de la zone `local` pour les clés du schéma. */
-export function onChanged(listener: (changes: StorageChanges) => void): void {
-  chrome.storage.onChanged.addListener((changes, areaName) => {
+/**
+ * Observe les changements de la zone `local` pour les clés du schéma.
+ * Rend une fonction qui arrête l'observation.
+ */
+export function onChanged(
+  listener: (changes: StorageChanges) => void,
+): () => void {
+  const wrapped = (changes: unknown, areaName: string): void => {
     if (areaName === "local") {
       listener(changes as StorageChanges);
     }
-  });
+  };
+  chrome.storage.onChanged.addListener(wrapped);
+  return () => chrome.storage.onChanged.removeListener(wrapped);
 }

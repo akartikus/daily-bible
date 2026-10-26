@@ -1,13 +1,15 @@
 /**
- * Wrapper mince autour de `chrome.alarms` pour l'alarme périodique
- * « verse-interval » (data-model.md — Alarm) : créée/recréée à l'activation
- * de l'affichage automatique et à chaque changement d'intervalle, supprimée
- * à la désactivation, recréée si absente à chaque démarrage du service
- * worker (recommandation officielle chrome.alarms). Isolé pour la
- * testabilité (constitution IV) — les tests stubbent le global `chrome`.
+ * Wrapper mince autour de `chrome.alarms` pour les alarmes :
+ * - « verse-interval » (data-model.md — Alarm) : alarme périodique pour
+ *   l'affichage automatique (feature 001)
+ * - « pomodoro-phase » (data-model.md — Alarm) : alarme one-shot pour
+ *   déclencher la transition de phase du pomodoro (feature 002)
+ * Isolé pour la testabilité (constitution IV) — les tests stubbent le global
+ * `chrome`.
  */
 
 export const ALARM_NAME = "verse-interval";
+export const POMODORO_ALARM_NAME = "pomodoro-phase";
 
 /** Crée (ou recrée) l'alarme périodique avec periodInMinutes = intervalMinutes. */
 export function createVerseIntervalAlarm(intervalMinutes: number): void {
@@ -31,4 +33,18 @@ export async function ensureVerseIntervalAlarm(
   if (!alarm) {
     createVerseIntervalAlarm(intervalMinutes);
   }
+}
+
+/**
+ * Crée (ou recrée) l'alarme one-shot pomodoro-phase avec l'échéance
+ * fournie en epoch ms. Utilisée pour déclencher la transition de phase
+ * du pomodoro (focus → pause / longue pause).
+ */
+export function createPomodoroPhaseAlarm(phaseEndsAt: number): void {
+  chrome.alarms.create(POMODORO_ALARM_NAME, { when: phaseEndsAt });
+}
+
+/*** Supprime l'alarme pomodoro-phase (suspension, reset, etc.). */
+export async function clearPomodoroPhaseAlarm(): Promise<void> {
+  await chrome.alarms.clear(POMODORO_ALARM_NAME);
 }

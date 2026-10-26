@@ -3,8 +3,10 @@
   import ErrorView from "./components/ErrorView.svelte";
   import SettingsView from "./components/SettingsView.svelte";
   import VerseView from "./components/VerseView.svelte";
+  import PomodoroStatus from "./components/PomodoroStatus.svelte";
   import { SettingsStore } from "./lib/settings.svelte.ts";
   import { VerseStore } from "./lib/verse.svelte.ts";
+  import { pomodoroStore } from "./lib/pomodoro.svelte.ts";
 
   const store = new VerseStore();
   const settingsStore = new SettingsStore();
@@ -19,6 +21,8 @@
     store.observe();
     void settingsStore.load();
     settingsStore.observe();
+    void pomodoroStore.load();
+    pomodoroStore.observe();
   });
 </script>
 
@@ -50,13 +54,20 @@
       settings={settingsStore.settings}
       onChange={(settings) => void settingsStore.update(settings)}
     />
-  {:else if verse}
-    <VerseView {verse} />
-  {:else if error}
-    <ErrorView message={error} onRetry={() => void store.load()} />
   {:else}
-    <main class="flex h-64 w-80 items-center justify-center">
-      <p class="text-lg">Chargement…</p>
-    </main>
+    <!-- FR-002 : le statut pomodoro reste visible en toutes circonstances
+         dans la vue verset (contracts/ui-behavior.md). -->
+    <PomodoroStatus
+      repetitions={settingsStore.settings.repetitionsBeforeLongBreak}
+    />
+    {#if verse}
+      <VerseView {verse} />
+    {:else if error}
+      <ErrorView message={error} onRetry={() => void store.load()} />
+    {:else}
+      <main class="flex h-64 w-80 items-center justify-center">
+        <p class="text-lg">Chargement…</p>
+      </main>
+    {/if}
   {/if}
 </div>

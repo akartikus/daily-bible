@@ -5,6 +5,9 @@ import {
   clearVerseIntervalAlarm,
   createVerseIntervalAlarm,
   ensureVerseIntervalAlarm,
+  POMODORO_ALARM_NAME,
+  createPomodoroPhaseAlarm,
+  clearPomodoroPhaseAlarm,
 } from "../../src/shared/chrome/alarms";
 
 describe("wrapper chrome.alarms (Alarm — data-model.md)", () => {
@@ -72,6 +75,31 @@ describe("wrapper chrome.alarms (Alarm — data-model.md)", () => {
     expect(listener).toHaveBeenCalledWith({
       name: "pomodoro-phase",
       when: 1_000,
+    });
+  });
+
+  describe("alarme pomodoro-phase (feature 002)", () => {
+    it("nomme l'alarme « pomodoro-phase »", () => {
+      expect(POMODORO_ALARM_NAME).toBe("pomodoro-phase");
+    });
+
+    it("createPomodoroPhaseAlarm crée une alarme one-shot avec when = phaseEndsAt", async () => {
+      const phaseEndsAt = 5_000;
+      createPomodoroPhaseAlarm(phaseEndsAt);
+      expect(chrome.alarms.create).toHaveBeenCalledWith("pomodoro-phase", {
+        when: phaseEndsAt,
+      });
+      expect(await chrome.alarms.get("pomodoro-phase")).toEqual({
+        name: "pomodoro-phase",
+        when: phaseEndsAt,
+      });
+    });
+
+    it("clearPomodoroPhaseAlarm supprime l'alarme pomodoro-phase", async () => {
+      await createPomodoroPhaseAlarm(5_000);
+      await clearPomodoroPhaseAlarm();
+      expect(chrome.alarms.clear).toHaveBeenCalledWith("pomodoro-phase");
+      expect(await chrome.alarms.get("pomodoro-phase")).toBeUndefined();
     });
   });
 });

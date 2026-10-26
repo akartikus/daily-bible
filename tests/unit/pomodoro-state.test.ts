@@ -129,6 +129,25 @@ describe("transitions pures du pomodoro", () => {
     });
   });
 
+  it("décale la fin du focus d'autant (reprise différée — scénario 5)", () => {
+    // Suspension avec 6 000 ms restants, puis reprise 60 000 ms plus tard :
+    // la fin du focus est décalée d'autant (phaseEndsAt = reprise + reste figé).
+    const state = {
+      ...initialPomodoroState(settings(), NOW),
+      running: false,
+      phaseEndsAt: null,
+      phaseRemainingMs: 6_000,
+    };
+    const resumeAt = NOW + 60_000;
+
+    expect(resumePomodoro(state, resumeAt)).toEqual({
+      ...state,
+      running: true,
+      phaseEndsAt: resumeAt + 6_000,
+      phaseRemainingMs: null,
+    });
+  });
+
   it("réconcilie un focus échu vers la pause", () => {
     const state = {
       ...initialPomodoroState(settings(), NOW),

@@ -13,6 +13,17 @@ import type { Verse } from "../../src/shared/bible/extract";
 import type { EnsureCurrentVerseResponse } from "../../src/background/service-worker";
 import App from "../../src/popup/App.svelte";
 
+// The pomodoro bar sends pomodoro-get-state on mount; only a verse draw is forbidden.
+function assertNoVerseDraw() {
+  const draws = vi
+    .mocked(chrome.runtime.sendMessage)
+    .mock.calls.filter(
+      ([message]) =>
+        (message as { type?: string }).type === "ensure-current-verse",
+    );
+  expect(draws).toHaveLength(0);
+}
+
 const verse: Verse = {
   bookId: "GEN",
   bookName: "Genèse",
@@ -45,7 +56,7 @@ describe("App (T018 — scénarios 1, 2 et 6 de quickstart.md)", () => {
     expect(await screen.findByText(verse.text)).toBeTruthy();
     expect(screen.getByText("Genèse 1:1")).toBeTruthy();
     expect(screen.getByText("Louis Segond 1910")).toBeTruthy();
-    expect(chrome.runtime.sendMessage).not.toHaveBeenCalled();
+    assertNoVerseDraw();
   });
 
   it("scénario 1 : installation fraîche → demande au service worker puis verset affiché", async () => {
@@ -118,7 +129,7 @@ describe("App : navigation réglages (T027 — FR-007/SC-003)", () => {
       screen.getByRole("button", { name: "Retour au verset" }),
     );
     expect(await screen.findByText(verse.text)).toBeTruthy();
-    expect(chrome.runtime.sendMessage).not.toHaveBeenCalled();
+    assertNoVerseDraw();
   });
 
   it("scénario 3 : réglages persistés → interrupteur et intervalle conservés (FR-006/SC-004)", async () => {

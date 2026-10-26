@@ -23,6 +23,7 @@ import {
   createVerseIntervalAlarm,
   ensureVerseIntervalAlarm,
 } from "../shared/chrome/alarms";
+import { registerPomodoro } from "./pomodoro";
 import { onMessage } from "../shared/chrome/runtime";
 import { get, onChanged, set } from "../shared/chrome/storage";
 import { readSettings, type Settings } from "../shared/settings/defaults";
@@ -55,6 +56,9 @@ chrome.runtime.onStartup.addListener(() => {
 chrome.runtime.onInstalled.addListener(() => {
   void ensureAlarmFromSettings();
 });
+
+// Enregistrer l'orchestration pomodoro (feature 002)
+registerPomodoro();
 
 // Recréer ou supprimer l'alarme à chaque écriture des réglages :
 // activation, désactivation, changement d'intervalle (storage-schema.md).

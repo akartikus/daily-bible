@@ -2,7 +2,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createChromeMock, type ChromeMock } from "../mocks/chrome";
 import { sendMessage } from "../../src/shared/chrome/runtime";
 import { get, set } from "../../src/shared/chrome/storage";
-import { ALARM_NAME } from "../../src/shared/chrome/alarms";
+import {
+  ALARM_NAME,
+  POMODORO_ALARM_NAME,
+} from "../../src/shared/chrome/alarms";
 import type { Verse } from "../../src/shared/bible/extract";
 import type { EnsureCurrentVerseResponse } from "../../src/background/service-worker";
 
@@ -233,7 +236,14 @@ describe("service-worker : pomodoro automatique (T024)", () => {
     await importServiceWorker();
     mock.fireStartup();
     await flush();
-    expect(chrome.alarms.create).not.toHaveBeenCalled();
+    // Le pomodoro crée son alarme au démarrage, mais pas l'alarme verse-interval
+    expect(chrome.alarms.create).toHaveBeenCalledTimes(1);
+    expect(chrome.alarms.create).toHaveBeenCalledWith(
+      POMODORO_ALARM_NAME,
+      expect.any(Object),
+    );
+    const verseAlarm = await mock.chrome.alarms.get(ALARM_NAME);
+    expect(verseAlarm).toBeUndefined();
   });
 
   it("onStartup ne recrée pas une alarme déjà présente (rythme fixe)", async () => {
@@ -244,7 +254,14 @@ describe("service-worker : pomodoro automatique (T024)", () => {
     await importServiceWorker();
     mock.fireStartup();
     await flush();
-    expect(chrome.alarms.create).toHaveBeenCalledTimes(1);
+    // Une création manuelle (verse-interval) + une création pomodoro (pomodoro-phase)
+    // L'alarme verse-interval existante n'est pas recréée
+    expect(chrome.alarms.create).toHaveBeenCalledTimes(2);
+    const verseAlarm = await mock.chrome.alarms.get(ALARM_NAME);
+    expect(verseAlarm).toEqual({
+      name: ALARM_NAME,
+      periodInMinutes: 25,
+    });
   });
 
   it("activation des réglages crée l'alarme avec l'intervalle choisi", async () => {

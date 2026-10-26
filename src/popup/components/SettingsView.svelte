@@ -1,6 +1,10 @@
 <script lang="ts">
   import type { Settings } from "../../shared/settings/defaults";
-  import { isValidIntervalMinutes } from "../../shared/settings/validate";
+  import {
+    isValidIntervalMinutes,
+    isValidPomodoroMinutes,
+    isValidRepetitionCount,
+  } from "../../shared/settings/validate";
 
   interface Props {
     settings: Settings;
@@ -9,59 +13,159 @@
 
   let { settings, onChange }: Props = $props();
 
-  const INTERVAL_ERROR_MESSAGE = "Entrez un nombre entier entre 1 et 1440.";
+  const MINUTES_ERROR_MESSAGE = "Entrez un nombre entier entre 1 et 1440.";
+  const REPETITIONS_ERROR_MESSAGE = "Entrez un nombre entier entre 1 et 10.";
 
-  let intervalError = $state<string | null>(null);
+  let errors = $state<Record<string, string>>({});
 
   function handleAutoDisplay(event: Event): void {
     const toggle = event.currentTarget as HTMLInputElement;
     onChange({ ...settings, autoDisplayEnabled: toggle.checked });
   }
 
-  function handleInterval(event: Event): void {
+  // FR-011 : saisie invalide refusée avec message, dernière valeur valide
+  // conservée.
+  function handleNumber(
+    event: Event,
+    field: keyof Pick<
+      Settings,
+      | "intervalMinutes"
+      | "focusMinutes"
+      | "breakMinutes"
+      | "longBreakMinutes"
+      | "repetitionsBeforeLongBreak"
+    >,
+    isValid: (value: number) => boolean,
+    errorMessage: string,
+  ): void {
     const input = event.currentTarget as HTMLInputElement;
     const value = Number(input.value);
-    if (isValidIntervalMinutes(value)) {
-      intervalError = null;
-      onChange({ ...settings, intervalMinutes: value });
+    if (isValid(value)) {
+      delete errors[field];
+      const next: Settings = { ...settings };
+      next[field] = value;
+      onChange(next);
     } else {
-      // FR-008 : saisie invalide refusée avec message, dernière valeur
-      // valide conservée.
-      intervalError = INTERVAL_ERROR_MESSAGE;
-      input.value = String(settings.intervalMinutes);
+      errors[field] = errorMessage;
+      input.value = String(settings[field]);
     }
   }
 </script>
 
 <main
-  class="flex h-64 w-80 flex-col items-center justify-center gap-4 p-4 text-center"
+  class="flex min-h-64 w-80 flex-col items-center justify-center gap-4 p-4 text-center"
 >
-  <label class="flex items-center gap-2" for="auto-display">
+  <label class="flex items-center gap-2">
     <input
-      id="auto-display"
       type="checkbox"
       checked={settings.autoDisplayEnabled}
       onchange={handleAutoDisplay}
-      class="size-4"
     />
-    <span>Affichage automatique</span>
+    Affichage automatique
   </label>
-
-  <label class="flex items-center gap-2" for="interval">
-    <span>Intervalle (minutes)</span>
+  <label class="flex flex-col items-center gap-1">
+    Intervalle (minutes)
     <input
-      id="interval"
       type="number"
       min="1"
       max="1440"
-      step="1"
       value={settings.intervalMinutes}
-      oninput={handleInterval}
-      class="w-20 rounded border border-gray-300 px-2 py-1"
+      oninput={(event) =>
+        handleNumber(
+          event,
+          "intervalMinutes",
+          isValidIntervalMinutes,
+          MINUTES_ERROR_MESSAGE,
+        )}
     />
+    {#if errors.intervalMinutes}
+      <span class="text-xs text-red-500" role="alert"
+        >{errors.intervalMinutes}</span
+      >
+    {/if}
   </label>
-
-  {#if intervalError}
-    <p role="alert" class="text-sm text-red-600">{intervalError}</p>
-  {/if}
+  <label class="flex flex-col items-center gap-1">
+    Focus (minutes)
+    <input
+      type="number"
+      min="1"
+      max="1440"
+      value={settings.focusMinutes}
+      oninput={(event) =>
+        handleNumber(
+          event,
+          "focusMinutes",
+          isValidPomodoroMinutes,
+          MINUTES_ERROR_MESSAGE,
+        )}
+    />
+    {#if errors.focusMinutes}
+      <span class="text-xs text-red-500" role="alert"
+        >{errors.focusMinutes}</span
+      >
+    {/if}
+  </label>
+  <label class="flex flex-col items-center gap-1">
+    Pause (minutes)
+    <input
+      type="number"
+      min="1"
+      max="1440"
+      value={settings.breakMinutes}
+      oninput={(event) =>
+        handleNumber(
+          event,
+          "breakMinutes",
+          isValidPomodoroMinutes,
+          MINUTES_ERROR_MESSAGE,
+        )}
+    />
+    {#if errors.breakMinutes}
+      <span class="text-xs text-red-500" role="alert"
+        >{errors.breakMinutes}</span
+      >
+    {/if}
+  </label>
+  <label class="flex flex-col items-center gap-1">
+    Longue pause (minutes)
+    <input
+      type="number"
+      min="1"
+      max="1440"
+      value={settings.longBreakMinutes}
+      oninput={(event) =>
+        handleNumber(
+          event,
+          "longBreakMinutes",
+          isValidPomodoroMinutes,
+          MINUTES_ERROR_MESSAGE,
+        )}
+    />
+    {#if errors.longBreakMinutes}
+      <span class="text-xs text-red-500" role="alert"
+        >{errors.longBreakMinutes}</span
+      >
+    {/if}
+  </label>
+  <label class="flex flex-col items-center gap-1">
+    Répétitions avant longue pause
+    <input
+      type="number"
+      min="1"
+      max="10"
+      value={settings.repetitionsBeforeLongBreak}
+      oninput={(event) =>
+        handleNumber(
+          event,
+          "repetitionsBeforeLongBreak",
+          isValidRepetitionCount,
+          REPETITIONS_ERROR_MESSAGE,
+        )}
+    />
+    {#if errors.repetitionsBeforeLongBreak}
+      <span class="text-xs text-red-500" role="alert"
+        >{errors.repetitionsBeforeLongBreak}</span
+      >
+    {/if}
+  </label>
 </main>
