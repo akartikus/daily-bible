@@ -154,6 +154,9 @@ export function createChromeMock(): ChromeMock {
       getUILanguage: vi.fn((): string | undefined => uiLanguage),
     },
     runtime: {
+      getManifest: vi.fn((): { version: string } => ({
+        version: "0.1.0",
+      })),
       sendMessage: vi.fn(
         (message: unknown): Promise<unknown> =>
           new Promise((resolve) => {

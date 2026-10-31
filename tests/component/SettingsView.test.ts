@@ -43,10 +43,10 @@ describe.each(languages)(
 
     it("affiche l'interrupteur désactivé et les valeurs par défaut des 5 champs (FR-003/FR-004/FR-011)", () => {
       renderView();
-      const toggle = screen.getByRole("checkbox", {
+      const toggle = screen.getByRole("switch", {
         name: m.settings.autoDisplay,
-      }) as HTMLInputElement;
-      expect(toggle.checked).toBe(false);
+      });
+      expect(toggle.getAttribute("aria-checked")).toBe("false");
       expect(getSpinbutton(m.settings.interval).value).toBe("25");
       expect(getSpinbutton(m.settings.focus).value).toBe("25");
       expect(getSpinbutton(m.settings.break).value).toBe("5");
@@ -54,10 +54,53 @@ describe.each(languages)(
       expect(getSpinbutton(m.settings.repetitions).value).toBe("4");
     });
 
+    it("chaque réglage est une ligne de grille deux colonnes identique (FR-008)", () => {
+      renderView();
+      const rows = [
+        m.settings.autoDisplay,
+        m.settings.interval,
+        m.settings.focus,
+        m.settings.break,
+        m.settings.longBreak,
+        m.settings.repetitions,
+      ].map((label) => screen.getByText(label).closest("div"));
+
+      // Gouttière verticale identique : une seule classe de ligne partagée.
+      const classNames = new Set(rows.map((row) => row?.className));
+      expect(classNames.size).toBe(1);
+      expect([...classNames][0]).toContain("grid-cols-[1fr_auto]");
+      expect([...classNames][0]).toContain("items-center");
+      // Label en colonne 1, champ en colonne 2 (dernier enfant de la ligne).
+      for (const row of rows) {
+        expect(row?.querySelector("label")).toBeTruthy();
+        const field = row?.lastElementChild;
+        const fieldEl = field?.matches("input, button")
+          ? field
+          : field?.querySelector("input, button");
+        expect(fieldEl).toBeTruthy();
+      }
+    });
+
+    it("erreur traduite sous le champ concerné, alignement des lignes suivant intact (FR-009)", async () => {
+      const { onChange } = renderView();
+      const interval = getSpinbutton(m.settings.interval);
+      await fireEvent.input(interval, { target: { value: "0" } });
+
+      const alert = screen.getByRole("alert");
+      expect(alert.textContent).toBe(m.errors.minutesRange);
+      // L'erreur vit dans la colonne 2 de la ligne du champ concerné, pas
+      // dans celle des lignes suivantes.
+      expect(alert.closest("div")?.contains(interval)).toBe(true);
+      const focusRow = screen.getByText(m.settings.focus).closest("div");
+      expect(focusRow?.className).toContain("grid-cols-[1fr_auto]");
+      expect(focusRow?.querySelector("[role='alert']")).toBeNull();
+      expect(onChange).not.toHaveBeenCalled();
+    });
+
     it("activer l'interrupteur appelle onChange avec autoDisplayEnabled=true (FR-003)", async () => {
       const { onChange } = renderView();
       await fireEvent.click(
-        screen.getByRole("checkbox", { name: m.settings.autoDisplay }),
+        screen.getByRole("switch", { name: m.settings.autoDisplay }),
       );
       expect(onChange).toHaveBeenCalledWith({
         ...DEFAULT_SETTINGS,
@@ -97,7 +140,7 @@ describe.each(languages)(
       await fireEvent.input(interval, { target: { value: "0" } });
       expect(screen.getByRole("alert").textContent).toBe(m.errors.minutesRange);
       expect(onChange).not.toHaveBeenCalled();
-      // Error text is inside the label, so the accessible name changes; reuse the ref.
+      // Dernière valeur valide conservée dans le champ (réutilise la ref).
       expect(interval.value).toBe("25");
     });
 
@@ -240,6 +283,14 @@ describe.each(languages)(
       });
       expect(screen.getByRole("alert").textContent).toBe(m.errors.minutesRange);
       expect(onChange).not.toHaveBeenCalled();
+    });
+
+    it("porte le copyright sitraka.dev (lien) et la version en pied de page (retour 003)", () => {
+      renderView();
+      const link = screen.getByRole("link", { name: "sitraka.dev" });
+      expect(link.getAttribute("href")).toBe("https://sitraka.dev");
+      const footer = screen.getByRole("contentinfo");
+      expect(footer.textContent).toContain("v0.1.0");
     });
   },
 );

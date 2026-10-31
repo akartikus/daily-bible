@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { RotateCcw } from "@lucide/svelte";
+  import { Button } from "$lib/components/ui/button/index.js";
   import { getMessages, resolveUiLocale } from "../../shared/i18n";
 
   interface Props {
@@ -12,15 +14,20 @@
   const messages = getMessages(resolveUiLocale(chrome.i18n.getUILanguage()));
 </script>
 
+<!-- min-h-full : remplit le conteneur défilant d'App, centré quel que soit
+     l'espace disponible. -->
 <main
-  class="flex h-64 w-80 flex-col items-center justify-center gap-4 p-4 text-center"
+  class="flex min-h-full flex-col items-center justify-center gap-4 p-4 text-center"
 >
   <p class="text-lg">{message}</p>
-  <button
-    type="button"
-    class="rounded bg-blue-600 px-4 py-2 text-white"
+  <Button
+    variant="outline"
+    size="icon"
+    class="rounded-full"
+    aria-label={messages.aria.retry}
+    title={messages.aria.retry}
     onclick={onRetry}
   >
-    {messages.aria.retry}
-  </button>
+    <RotateCcw />
+  </Button>
 </main>

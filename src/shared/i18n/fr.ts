@@ -10,8 +10,7 @@ export const fr: Messages = {
     break: "Pause",
     longBreak: "Longue pause",
   },
-  repetition: (current: number, total: number) =>
-    `répétition ${current} / ${total}`,
+  remaining: (minutes: number) => `${minutes} min`,
   aria: {
     cycleProgress: "Progression du cycle pomodoro",
     pause: "Mettre en pause",

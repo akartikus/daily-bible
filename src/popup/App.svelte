@@ -1,9 +1,12 @@
 <script lang="ts">
   import { onMount } from "svelte";
+  import { Settings, Undo2 } from "@lucide/svelte";
+  import { Button } from "$lib/components/ui/button/index.js";
   import ErrorView from "./components/ErrorView.svelte";
   import SettingsView from "./components/SettingsView.svelte";
   import VerseView from "./components/VerseView.svelte";
   import PomodoroStatus from "./components/PomodoroStatus.svelte";
+  import PomodoroStatusHeader from "./components/PomodoroStatusHeader.svelte";
   import { getMessages, resolveUiLocale } from "../shared/i18n";
   import { SettingsStore } from "./lib/settings.svelte.ts";
   import { VerseStore } from "./lib/verse.svelte.ts";
@@ -31,26 +34,32 @@
   });
 </script>
 
-<div class="w-80">
-  <header class="flex h-9 items-center justify-end px-1">
+<!-- Popup à taille fixe 400×400 (retour utilisateur) : en-têtes et pied
+     fixes, la zone du verset défile et occupe la plus grande part. -->
+<div class="flex h-[400px] w-[400px] flex-col">
+  <header class="flex h-9 shrink-0 items-center justify-end px-1">
     {#if view === "verse"}
-      <button
-        type="button"
-        class="rounded px-2 text-gray-400 hover:text-gray-600"
+      <Button
+        variant="ghost"
+        size="icon"
+        class="rounded-full"
         aria-label={messages.aria.settings}
         title={messages.aria.settings}
         onclick={() => (view = "settings")}
       >
-        ⚙
-      </button>
+        <Settings />
+      </Button>
     {:else}
-      <button
-        type="button"
-        class="rounded px-2 text-sm text-blue-600"
+      <Button
+        variant="ghost"
+        size="icon"
+        class="rounded-full"
+        aria-label={messages.settings.backToVerse}
+        title={messages.settings.backToVerse}
         onclick={() => (view = "verse")}
       >
-        {messages.settings.backToVerse}
-      </button>
+        <Undo2 />
+      </Button>
     {/if}
   </header>
 
@@ -60,19 +69,25 @@
       onChange={(settings) => void settingsStore.update(settings)}
     />
   {:else}
-    <!-- FR-002 : le statut pomodoro reste visible en toutes circonstances
-         dans la vue verset (contracts/ui-behavior.md). -->
+    <!-- FR-002 : le statut pomodoro reste visible en toutes circonstances,
+         en en-tête au-dessus du verset (retour utilisateur). -->
+    <PomodoroStatusHeader />
+    <!-- Conteneur du verset défilant : la plus grande part de la fenêtre. -->
+    <div class="min-h-0 flex-1 overflow-y-auto">
+      {#if verse}
+        <VerseView {verse} />
+      {:else if error}
+        <ErrorView message={error} onRetry={() => void store.load()} />
+      {:else}
+        <div class="flex h-full items-center justify-center">
+          <p class="text-lg text-muted-foreground">{messages.loading}</p>
+        </div>
+      {/if}
+    </div>
+    <!-- FR-002 : le statut pomodoro reste visible en toutes circonstances,
+         en pied de fenêtre (footer). -->
     <PomodoroStatus
       repetitions={settingsStore.settings.repetitionsBeforeLongBreak}
     />
-    {#if verse}
-      <VerseView {verse} />
-    {:else if error}
-      <ErrorView message={error} onRetry={() => void store.load()} />
-    {:else}
-      <main class="flex h-64 w-80 items-center justify-center">
-        <p class="text-lg">{messages.loading}</p>
-      </main>
-    {/if}
   {/if}
 </div>

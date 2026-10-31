@@ -131,16 +131,22 @@ describe.each(languages)(
       render(App);
       expect(await screen.findByText(verse.text)).toBeTruthy();
 
-      await fireEvent.click(
-        screen.getByRole("button", { name: m.aria.settings }),
-      );
+      const gear = screen.getByRole("button", { name: m.aria.settings });
+      expect(gear.getAttribute("title")).toBe(m.aria.settings);
+      // Retour utilisateur : en-tête arrondi, sans centrage.
+      expect(gear.classList.contains("rounded-full")).toBe(true);
+      await fireEvent.click(gear);
       expect(
-        screen.getByRole("checkbox", { name: m.settings.autoDisplay }),
+        screen.getByRole("switch", { name: m.settings.autoDisplay }),
       ).toBeTruthy();
 
-      await fireEvent.click(
-        screen.getByRole("button", { name: m.settings.backToVerse }),
-      );
+      const back = screen.getByRole("button", {
+        name: m.settings.backToVerse,
+      });
+      expect(back.getAttribute("title")).toBe(m.settings.backToVerse);
+      expect(back.querySelector("svg")).toBeTruthy();
+      expect(back.classList.contains("rounded-full")).toBe(true);
+      await fireEvent.click(back);
       expect(await screen.findByText(verse.text)).toBeTruthy();
       assertNoVerseDraw();
     });
@@ -157,10 +163,12 @@ describe.each(languages)(
         screen.getByRole("button", { name: m.aria.settings }),
       );
 
-      const toggle = screen.getByRole("checkbox", {
+      const toggle = screen.getByRole("switch", {
         name: m.settings.autoDisplay,
-      }) as HTMLInputElement;
-      await waitFor(() => expect(toggle.checked).toBe(true));
+      });
+      await waitFor(() =>
+        expect(toggle.getAttribute("aria-checked")).toBe("true"),
+      );
       expect(
         (
           screen.getByRole("spinbutton", {
@@ -176,7 +184,7 @@ describe.each(languages)(
         screen.getByRole("button", { name: m.aria.settings }),
       );
       await fireEvent.click(
-        screen.getByRole("checkbox", { name: m.settings.autoDisplay }),
+        screen.getByRole("switch", { name: m.settings.autoDisplay }),
       );
 
       await waitFor(async () =>

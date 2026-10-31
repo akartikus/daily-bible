@@ -16,6 +16,8 @@ const verse: Verse = {
 
 afterEach(cleanup);
 
+// VerseView ne porte plus aucune chaîne localisée (le surtitre est la
+// traduction du verset) — pas de boucle de locales.
 describe("VerseView (FR-009 : texte + référence + traduction)", () => {
   it("affiche le texte du verset", () => {
     render(VerseView, { verse });
@@ -27,7 +29,7 @@ describe("VerseView (FR-009 : texte + référence + traduction)", () => {
     expect(screen.getByText("Genèse 1:1")).toBeTruthy();
   });
 
-  it("affiche la traduction", () => {
+  it("affiche la traduction en surtitre", () => {
     render(VerseView, { verse });
     expect(screen.getByText("Louis Segond 1910")).toBeTruthy();
   });

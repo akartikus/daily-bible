@@ -31,7 +31,7 @@ describe("getMessages (catalogue — contracts/i18n.md)", () => {
     const messages = getMessages("fr");
     expect(messages.status.focus).toBe("Focus");
     expect(messages.status.longBreak).toBe("Longue pause");
-    expect(messages.repetition(1, 4)).toBe("répétition 1 / 4");
+    expect(messages.aria.cycleProgress).toBe("Progression du cycle pomodoro");
     expect(messages.errors.minutesRange).toBe(
       "Entrez un nombre entier entre 1 et 1440.",
     );
@@ -41,7 +41,7 @@ describe("getMessages (catalogue — contracts/i18n.md)", () => {
     const messages = getMessages("en");
     expect(messages.status.focus).toBe("Focus");
     expect(messages.status.longBreak).toBe("Long break");
-    expect(messages.repetition(1, 4)).toBe("repetition 1 / 4");
+    expect(messages.aria.cycleProgress).toBe("Pomodoro cycle progress");
     expect(messages.errors.minutesRange).toBe(
       "Enter a whole number between 1 and 1440.",
     );

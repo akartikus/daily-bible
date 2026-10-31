@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { Pause, Play, SkipForward } from "@lucide/svelte";
+  import { Button } from "$lib/components/ui/button/index.js";
   import { getMessages, resolveUiLocale } from "../../shared/i18n";
   import { pomodoroStore } from "../lib/pomodoro.svelte.ts";
 
@@ -15,152 +17,148 @@
   // Locale résolue une seule fois par ouverture (contracts/i18n.md).
   const messages = getMessages(resolveUiLocale(chrome.i18n.getUILanguage()));
 
-  /** Largeur d'un segment de la barre de progression (en %) */
-  const segmentWidth = $derived(repetitions > 0 ? 100 / repetitions : 0);
+  /** Libellé accessible du bouton play/pause : l'action opposée à l'état. */
+  const toggleLabel = $derived(
+    store.state?.running ? messages.aria.pause : messages.aria.resume,
+  );
 
-  /** Classes CSS pour un segment selon son état */
-  function segmentClass(index: number): string {
-    if (!store.state) return "bg-gray-200";
+  // Horloge locale : fait vivre le compte à rebours tant que le popup est
+  // ouvert (l'état porté par le service worker ne tick pas).
+  let now = $state(Date.now());
+  $effect(() => {
+    const id = setInterval(() => (now = Date.now()), 1000);
+    return () => clearInterval(id);
+  });
+
+  /** Format mm:ss d'une durée en millisecondes (arrondi à la seconde entamée). */
+  function formatClock(ms: number): string {
+    const totalSeconds = Math.ceil(ms / 1000);
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+  }
+
+  /** Compte à rebours de la phase en cours : lecture → phaseEndsAt, suspendu
+      → temps restant figé (phaseRemainingMs). */
+  const countdown = $derived.by(() => {
+    const state = store.state;
+    if (!state) return null;
+    if (!state.running) {
+      return state.phaseRemainingMs === null
+        ? null
+        : formatClock(state.phaseRemainingMs);
+    }
+    if (state.phaseEndsAt === null) return null;
+    return formatClock(Math.max(0, state.phaseEndsAt - now));
+  });
+
+  /** Couleur d'un segment du cycle selon son état — pastels de la charte.
+      Ordre requis par le contrat (courant distinct des accomplis) : le
+      segment courant se teste avant les accomplis, sinon `index < currentRep`
+      l'attrape toujours. */
+  function segmentColor(index: number): string {
+    if (!store.state) return "var(--muted)";
     const currentRep = store.currentRepetition;
     const isLongBreak = store.state?.status === "longBreak";
 
     if (isLongBreak) {
-      return "bg-amber-500";
-    }
-
-    if (index < currentRep) {
-      return "bg-green-500"; // répétitions accomplies
+      return "var(--rose)"; // anneau pleine en longue pause
     }
 
     if (index === currentRep - 1) {
-      return "bg-blue-500"; // répétition courante
+      return "var(--honey)"; // répétition courante
     }
 
-    return "bg-gray-200"; // répétitions futures
+    if (index < currentRep - 1) {
+      return "var(--sage)"; // répétitions accomplies
+    }
+
+    return "var(--muted)"; // répétitions futures
   }
+
+  /** Anneau donut : la bordure du bouton play/pause EST la barre de
+      progression du cycle (retour utilisateur) — un conic-gradient à X
+      segments ; seul l'espace entre le bouton (52 px) et le donut (64 px)
+      reste visible, 6 px d'anneau. */
+  const ringGradient = $derived(
+    repetitions > 0
+      ? `conic-gradient(${Array.from({ length: repetitions }, (_, i) => {
+          const width = 100 / repetitions;
+          return `${segmentColor(i)} ${(i * width).toFixed(2)}% ${(
+            (i + 1) *
+            width
+          ).toFixed(2)}%`;
+        }).join(", ")})`
+      : "var(--muted)",
+  );
 </script>
 
-<div class="p-3 space-y-2">
-  <!-- Statut et progression -->
-  <div class="space-y-1">
-    <div class="flex items-center justify-between text-sm">
-      <span class="font-medium text-gray-700">{store.statusLabel}</span>
-      {#if store.state}
-        <span class="text-xs text-gray-500">
-          {messages.repetition(store.currentRepetition, repetitions)}
-        </span>
-      {/if}
+<!-- Pied à hauteur fixe et compacte (retour utilisateur) : l'anneau donut
+     autour du play/pause EST la barre du cycle, le compte à rebours de la
+     phase passe dessous. Le statut et les minutes restantes vivent dans
+     l'en-tête (PomodoroStatusHeader), au-dessus du verset. -->
+<footer
+  class="flex h-24 shrink-0 flex-col items-center justify-center gap-1 px-4"
+>
+  <div class="flex items-center justify-center gap-2">
+    <!-- Anneau donut : la bordure du bouton play/pause est la barre du cycle —
+         donut 64 px, bouton 52 px, icône 28 px au centre. -->
+    <div class="relative inline-flex size-16 items-center justify-center">
+      <div
+        class="absolute inset-0 rounded-full transition-all duration-300"
+        role="progressbar"
+        aria-valuenow={store.currentRepetition}
+        aria-valuemin={0}
+        aria-valuemax={repetitions}
+        aria-label={messages.aria.cycleProgress}
+        style="background: {ringGradient}"
+      ></div>
+      <!-- `relative` fait peindre le bouton APRÈS l'anneau (ordre du DOM) :
+           son fond opaque creuse le centre, l'icône reste visible — un donut,
+           pas un camembert. -->
+      <Button
+        variant="outline"
+        size="icon"
+        class="relative size-13 rounded-full"
+        onclick={() => store.toggle()}
+        disabled={!store.state}
+        aria-label={toggleLabel}
+        title={toggleLabel}
+      >
+        {#if store.state?.running}
+          <Pause class="size-7" />
+        {:else}
+          <Play class="size-7" />
+        {/if}
+      </Button>
     </div>
-
-    <!-- Barre de progression à X segments -->
-    <div
-      class="h-2 bg-gray-100 rounded-full overflow-hidden"
-      role="progressbar"
-      aria-valuenow={store.currentRepetition}
-      aria-valuemin={0}
-      aria-valuemax={repetitions}
-      aria-label={messages.aria.cycleProgress}
-    >
-      {#each Array.from({ length: repetitions }, (_, i) => i) as i (i)}
-        <div
-          class="h-full transition-all duration-300 {segmentClass(i)}"
-          style="width: {segmentWidth}%"
-        ></div>
-      {/each}
-    </div>
-  </div>
-
-  <!-- Contrôles : play/pause et next -->
-  <div class="flex items-center gap-2">
-    <!-- Play / Pause -->
-    <button
-      type="button"
-      class="flex-1 py-2 px-3 text-sm font-medium text-white rounded-lg transition-colors
-        {store.state?.running
-        ? 'bg-red-500 hover:bg-red-600'
-        : 'bg-green-500 hover:bg-green-600'}"
-      onclick={() => store.toggle()}
-      disabled={!store.state}
-      aria-label={store.state?.running
-        ? messages.aria.pause
-        : messages.aria.resume}
-    >
-      {#if store.state?.running}
-        <span class="flex items-center justify-center gap-1">
-          <svg
-            class="w-4 h-4"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"
-            />
-          </svg>
-          Pause
-        </span>
-      {:else}
-        <span class="flex items-center justify-center gap-1">
-          <svg
-            class="w-4 h-4"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"
-            />
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-            />
-          </svg>
-          Play
-        </span>
-      {/if}
-    </button>
 
     <!-- Next (visible seulement en pause / longue pause) -->
     {#if store.showNext}
-      <button
-        type="button"
-        class="px-3 py-2 text-sm font-medium text-white bg-blue-500 hover:bg-blue-600 rounded-lg transition-colors"
+      <Button
+        variant="outline"
+        size="icon"
+        class="rounded-full"
         onclick={() => store.next()}
         disabled={!store.state}
         aria-label={messages.aria.next}
+        title={messages.aria.next}
       >
-        <span class="flex items-center justify-center gap-1">
-          <svg
-            class="w-4 h-4"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M13 5l7 7-7 7M5 5l7 7-7 7"
-            />
-          </svg>
-          Next
-        </span>
-      </button>
+        <SkipForward />
+      </Button>
     {/if}
   </div>
 
-  <!-- Message d'erreur minimal -->
+  <!-- Compte à rebours mm:ss de la phase ou message d'erreur : un seul
+       emplacement d'une ligne, la hauteur du pied ne bouge pas (fixe).
+       tabular-nums : les chiffres restent en place au fil des secondes. -->
   {#if store.error}
-    <div class="text-xs text-red-500 text-center" role="alert">
+    <p class="text-center text-xs text-destructive" role="alert">
       {store.error}
-    </div>
+    </p>
+  {:else if countdown}
+    <p class="text-center text-xs tabular-nums text-muted-foreground/80">
+      {countdown}
+    </p>
   {/if}
-</div>
+</footer>

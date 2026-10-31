@@ -28,81 +28,80 @@ describe.each(languages)("PomodoroStatus — locale %s", (language) => {
     cleanup();
   });
 
-  describe("Affichage du statut", () => {
-    it("affiche le statut Focus par défaut", () => {
+  describe("Compte à rebours de la phase", () => {
+    // Horloge simulée : le compte à rebours est déterministe au test.
+    beforeEach(() => {
+      vi.useFakeTimers();
+      vi.setSystemTime(1_000_000_000_000);
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it("affiche mm:ss décroissant pendant la lecture", async () => {
       pomodoroStore.state = {
         status: "focus",
         repetition: 1,
         running: true,
-        phaseEndsAt: Date.now() + 25 * 60_000,
+        phaseEndsAt: 1_000_000_000_000 + 25 * 60_000,
         phaseRemainingMs: null,
       };
 
       render(PomodoroStatus, { props: { repetitions: 4 } });
+      expect(screen.getByText("25:00")).toBeTruthy();
 
-      expect(screen.getByText(m.status.focus)).toBeTruthy();
+      await vi.advanceTimersByTimeAsync(61_000);
+      expect(screen.getByText("23:59")).toBeTruthy();
     });
 
-    it("affiche le libellé localisé quand l'état est en pause", () => {
+    it("affiche le temps restant figé en pause (phaseRemainingMs)", async () => {
       pomodoroStore.state = {
         status: "break",
         repetition: 1,
-        running: true,
-        phaseEndsAt: Date.now() + 5 * 60_000,
-        phaseRemainingMs: null,
+        running: false,
+        phaseEndsAt: null,
+        phaseRemainingMs: 10 * 60_000 + 5_000,
       };
 
       render(PomodoroStatus, { props: { repetitions: 4 } });
+      expect(screen.getByText("10:05")).toBeTruthy();
 
-      // Le libellé de statut se distingue du texte visible du bouton pause
-      // (« Pause ») par ses classes ; en anglais le statut est « Break ».
-      const statusLabel = screen.getByText(m.status.break, {
-        selector: "span.font-medium.text-gray-700",
-      });
-      expect(statusLabel).toBeTruthy();
+      // Suspendu : le temps est figé, aucune seconde ne passe.
+      await vi.advanceTimersByTimeAsync(61_000);
+      expect(screen.getByText("10:05")).toBeTruthy();
     });
 
-    it("affiche le libellé localisé pour longBreak", () => {
-      pomodoroStore.state = {
-        status: "longBreak",
-        repetition: 4,
-        running: true,
-        phaseEndsAt: Date.now() + 15 * 60_000,
-        phaseRemainingMs: null,
-      };
+    it("ne montre rien sans état", () => {
+      pomodoroStore.state = null;
 
       render(PomodoroStatus, { props: { repetitions: 4 } });
 
-      expect(screen.getByText(m.status.longBreak)).toBeTruthy();
-    });
-
-    it("affiche la répétition courante / total", () => {
-      pomodoroStore.state = {
-        status: "focus",
-        repetition: 2,
-        running: true,
-        phaseEndsAt: Date.now() + 25 * 60_000,
-        phaseRemainingMs: null,
-      };
-
-      render(PomodoroStatus, { props: { repetitions: 4 } });
-
-      expect(screen.getByText(m.repetition(2, 4))).toBeTruthy();
+      expect(screen.queryByText(/^\d{2}:\d{2}$/)).toBeNull();
     });
   });
 
-  describe("Barre de progression", () => {
-    it("affiche 4 segments pour X=4, avec son libellé accessible localisé", () => {
+  describe("Anneau de progression (bordure du play/pause)", () => {
+    it("porte le rôle progressbar localisé et entoure le bouton play/pause", () => {
       render(PomodoroStatus, { props: { repetitions: 4 } });
 
-      const progressBar = screen.getByRole("progressbar", {
+      const ring = screen.getByRole("progressbar", {
         name: m.aria.cycleProgress,
       });
-      const segments = progressBar.querySelectorAll(":scope > div");
-      expect(segments.length).toBe(4);
+      const button = screen.getByRole("button", { name: m.aria.resume });
+      // Le donut est la bordure du bouton : même wrapper de 64 px.
+      expect(ring.parentElement).toBe(button.parentElement);
+      expect(ring.parentElement?.classList.contains("size-16")).toBe(true);
+      expect(button.classList.contains("size-13")).toBe(true);
+      // Le bouton suit l'anneau dans le DOM (et `relative`) : son fond opaque
+      // peint au-dessus — donut, pas camembert, l'icône reste visible.
+      expect(
+        ring.compareDocumentPosition(button) & Node.DOCUMENT_POSITION_FOLLOWING,
+      ).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+      expect(button.classList.contains("relative")).toBe(true);
     });
 
-    it("remplit les segments accomplis en vert", () => {
+    it("porte X segments coniques, accomplis en sage, le courant en miel", () => {
       pomodoroStore.state = {
         status: "focus",
         repetition: 2,
@@ -113,11 +112,17 @@ describe.each(languages)("PomodoroStatus — locale %s", (language) => {
 
       render(PomodoroStatus, { props: { repetitions: 4 } });
 
-      // Les segments 1 et 2 doivent être verts/bleus (accomplis et courant)
-      // Le test détaillé nécessiterait d'inspecter les classes CSS
+      const style =
+        screen
+          .getByRole("progressbar", { name: m.aria.cycleProgress })
+          .getAttribute("style") ?? "";
+      expect(style).toContain("conic-gradient");
+      expect(style.match(/var\(--/g)?.length).toBe(4);
+      expect(style).toContain("var(--sage) 0.00% 25.00%");
+      expect(style).toContain("var(--honey) 25.00% 50.00%");
     });
 
-    it("affiche la barre pleine en longBreak", () => {
+    it("affiche l'anneau pleine en rose en longBreak", () => {
       pomodoroStore.state = {
         status: "longBreak",
         repetition: 4,
@@ -128,7 +133,11 @@ describe.each(languages)("PomodoroStatus — locale %s", (language) => {
 
       render(PomodoroStatus, { props: { repetitions: 4 } });
 
-      // En longBreak, tous les segments doivent être "accomplis" (amber)
+      const style =
+        screen
+          .getByRole("progressbar", { name: m.aria.cycleProgress })
+          .getAttribute("style") ?? "";
+      expect(style.match(/var\(--rose\)/g)?.length).toBe(4);
     });
   });
 
@@ -146,6 +155,32 @@ describe.each(languages)("PomodoroStatus — locale %s", (language) => {
 
       const button = screen.getByRole("button", { name: m.aria.pause });
       expect(button).toBeTruthy();
+    });
+
+    it("porte aria-label et title traduits, sans texte visible (FR-005)", () => {
+      pomodoroStore.state = {
+        status: "focus",
+        repetition: 1,
+        running: true,
+        phaseEndsAt: Date.now() + 25 * 60_000,
+        phaseRemainingMs: null,
+      };
+
+      render(PomodoroStatus, { props: { repetitions: 4 } });
+
+      const button = screen.getByRole("button", { name: m.aria.pause });
+      expect(button.getAttribute("title")).toBe(m.aria.pause);
+      expect(button.querySelector("svg")).toBeTruthy();
+      expect(button.textContent?.trim()).toBe("");
+      // Retour utilisateur : commande circulaire (donut 64 px, bouton 52 px),
+      // groupe centré.
+      expect(button.classList.contains("size-13")).toBe(true);
+      expect(button.classList.contains("rounded-full")).toBe(true);
+      expect(
+        button.parentElement?.parentElement?.classList.contains(
+          "justify-center",
+        ),
+      ).toBe(true);
     });
 
     it("porte le libellé accessible reprise quand running=false", () => {
@@ -208,7 +243,12 @@ describe.each(languages)("PomodoroStatus — locale %s", (language) => {
 
       render(PomodoroStatus, { props: { repetitions: 4 } });
 
-      expect(screen.getByRole("button", { name: m.aria.next })).toBeTruthy();
+      const nextButton = screen.getByRole("button", { name: m.aria.next });
+      expect(nextButton).toBeTruthy();
+      expect(nextButton.getAttribute("title")).toBe(m.aria.next);
+      expect(nextButton.querySelector("svg")).toBeTruthy();
+      expect(nextButton.textContent?.trim()).toBe("");
+      expect(nextButton.classList.contains("rounded-full")).toBe(true);
     });
 
     it("est caché en focus", () => {

@@ -8,8 +8,7 @@ export const en = {
     break: "Break",
     longBreak: "Long break",
   },
-  repetition: (current: number, total: number) =>
-    `repetition ${current} / ${total}`,
+  remaining: (minutes: number) => `${minutes} min`,
   aria: {
     cycleProgress: "Pomodoro cycle progress",
     pause: "Pause",

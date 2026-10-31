@@ -76,6 +76,14 @@ Ce que chaque tâche a apporté, en une ligne courte.
 - T002 : tous les textes de l'extension existent en français et en anglais ; la langue suit celle du navigateur (français) ou l'anglais sinon.
 - T003 : le verset s'affiche dans la traduction de la langue du navigateur — Louis Segond en français, King James Version en anglais.
 - T004 : tous les textes de la fenêtre (statuts, réglages, boutons, messages) suivent la langue du navigateur.
+- T005 : les boutons deviennent des icônes seules et rondes ; les commandes sont centrées ; leur nom suit la langue du navigateur.
+- T006 : les réglages s'alignent en deux colonnes ; la fenêtre adopte une charte crème pastel avec le verset en police Lora.
+- T006 (retour) : le statut pomodoro passe en pied de fenêtre, séparé du verset par un filet discret ; la barre de cycle reste linéaire et le segment en cours se distingue des accomplis.
+- T006 (retour 2) : la fenêtre est fixée à 400×320 et le verset défile s'il est long ; le statut s'agrandit en en-tête du pied et affiche les minutes restantes ; les réglages gagnent un pied de page avec le site et la version.
+- T006 (retour 3) : la fenêtre passe à 400×400 ; le statut s'affiche en en-tête au-dessus du verset qui occupe la plus grande place avec sa référence en vedette ; le pied du minuteur devient fixe et compact.
+- T006 (retour 4) : la progression du cycle devient un anneau autour du bouton lecture agrandi ; la légende reste sous l'anneau.
+- T006 (retour 5) : le bouton lecture s'agrandit encore (anneau de 6 px) ; le filet entre le verset et le minuteur disparaît ; le décompte des minutes est vérifié par un test qui fait tourner l'horloge.
+- T006 (retour 6) : sous l'anneau, le décompte de la phase s'affiche en minutes et secondes qui descendent en temps réel.
 
 ## Finitions / Qualité
 

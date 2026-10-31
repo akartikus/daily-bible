@@ -36,7 +36,11 @@ describe.each(languages)(
     it("affiche un bouton de relance localisé qui déclenche onRetry", async () => {
       const onRetry = vi.fn();
       render(ErrorView, { message: "Erreur", onRetry });
-      await fireEvent.click(screen.getByRole("button", { name: m.aria.retry }));
+      const button = screen.getByRole("button", { name: m.aria.retry });
+      expect(button.getAttribute("title")).toBe(m.aria.retry);
+      expect(button.querySelector("svg")).toBeTruthy();
+      expect(button.classList.contains("rounded-full")).toBe(true);
+      await fireEvent.click(button);
       expect(onRetry).toHaveBeenCalledOnce();
     });
   },
