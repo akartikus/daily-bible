@@ -1,15 +1,22 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createChromeMock, type ChromeMock } from "../mocks/chrome";
 import { set } from "../../src/shared/chrome/storage";
+import { getMessages, resolveUiLocale } from "../../src/shared/i18n";
 import { PomodoroStore } from "../../src/popup/lib/pomodoro.svelte";
 
-describe("PomodoroStore", () => {
+// T004 : les messages d'erreur du store s'affirment aux deux locales, textes
+// attendus tirés du catalogue de la locale résolue (mock getUILanguage pilotable).
+const languages = ["fr", "en-US"] as const;
+
+describe.each(languages)("PomodoroStore — locale %s", (language) => {
+  const m = getMessages(resolveUiLocale(language));
   let mock: ChromeMock;
   let store: typeof PomodoroStore.prototype;
 
   beforeEach(async () => {
     vi.resetModules();
     mock = createChromeMock();
+    mock.setUiLanguage(language);
     vi.stubGlobal("chrome", mock.chrome);
     // Réinitialiser le store en important le module frais
     const { pomodoroStore } =
@@ -64,7 +71,7 @@ describe("PomodoroStore", () => {
       expect(store.error).toBeNull();
     });
 
-    it("gère l'erreur si le service worker ne répond pas", async () => {
+    it("gère l'erreur si le service worker ne répond pas, message localisé", async () => {
       mock.chrome.runtime.sendMessage = vi
         .fn()
         .mockRejectedValue(new Error("Erreur"));
@@ -72,7 +79,7 @@ describe("PomodoroStore", () => {
       await store.load();
 
       expect(store.state).toBeNull();
-      expect(store.error).toBe("Impossible de charger l'état du pomodoro");
+      expect(store.error).toBe(m.store.loadError);
     });
   });
 
@@ -200,6 +207,21 @@ describe("PomodoroStore", () => {
       await store.toggle();
       expect(store.state).toEqual(runningState);
     });
+
+    it("pause/resume/next en échec → message localisé de la clé du catalogue", async () => {
+      mock.chrome.runtime.sendMessage = vi
+        .fn()
+        .mockRejectedValue(new Error("Erreur"));
+
+      await store.pause();
+      expect(store.error).toBe(m.store.pauseError);
+
+      await store.resume();
+      expect(store.error).toBe(m.store.resumeError);
+
+      await store.next();
+      expect(store.error).toBe(m.store.nextError);
+    });
   });
 
   describe("next()", () => {
@@ -240,9 +262,35 @@ describe("PomodoroStore", () => {
       // (dans un vrai test, on utiliserait observe())
     });
 
-    it("statusLabel retourne le bon libellé", async () => {
-      // Test direct du getter via état interne
-      // Le store n'a pas de setter public pour l'état, on teste via load()
+    it("statusLabel retourne le libellé localisé du statut courant", () => {
+      expect(store.statusLabel).toBe("—");
+
+      store.state = {
+        status: "focus",
+        repetition: 1,
+        running: true,
+        phaseEndsAt: Date.now() + 25 * 60_000,
+        phaseRemainingMs: null,
+      };
+      expect(store.statusLabel).toBe(m.status.focus);
+
+      store.state = {
+        status: "break",
+        repetition: 1,
+        running: true,
+        phaseEndsAt: Date.now() + 5 * 60_000,
+        phaseRemainingMs: null,
+      };
+      expect(store.statusLabel).toBe(m.status.break);
+
+      store.state = {
+        status: "longBreak",
+        repetition: 4,
+        running: true,
+        phaseEndsAt: Date.now() + 15 * 60_000,
+        phaseRemainingMs: null,
+      };
+      expect(store.statusLabel).toBe(m.status.longBreak);
     });
   });
 });

@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { Settings } from "../../shared/settings/defaults";
+  import { getMessages, resolveUiLocale } from "../../shared/i18n";
   import {
     isValidIntervalMinutes,
     isValidPomodoroMinutes,
@@ -13,8 +14,8 @@
 
   let { settings, onChange }: Props = $props();
 
-  const MINUTES_ERROR_MESSAGE = "Entrez un nombre entier entre 1 et 1440.";
-  const REPETITIONS_ERROR_MESSAGE = "Entrez un nombre entier entre 1 et 10.";
+  // Locale résolue une seule fois par ouverture (contracts/i18n.md).
+  const messages = getMessages(resolveUiLocale(chrome.i18n.getUILanguage()));
 
   let errors = $state<Record<string, string>>({});
 
@@ -61,10 +62,10 @@
       checked={settings.autoDisplayEnabled}
       onchange={handleAutoDisplay}
     />
-    Affichage automatique
+    {messages.settings.autoDisplay}
   </label>
   <label class="flex flex-col items-center gap-1">
-    Intervalle (minutes)
+    {messages.settings.interval}
     <input
       type="number"
       min="1"
@@ -75,7 +76,7 @@
           event,
           "intervalMinutes",
           isValidIntervalMinutes,
-          MINUTES_ERROR_MESSAGE,
+          messages.errors.minutesRange,
         )}
     />
     {#if errors.intervalMinutes}
@@ -85,7 +86,7 @@
     {/if}
   </label>
   <label class="flex flex-col items-center gap-1">
-    Focus (minutes)
+    {messages.settings.focus}
     <input
       type="number"
       min="1"
@@ -96,7 +97,7 @@
           event,
           "focusMinutes",
           isValidPomodoroMinutes,
-          MINUTES_ERROR_MESSAGE,
+          messages.errors.minutesRange,
         )}
     />
     {#if errors.focusMinutes}
@@ -106,7 +107,7 @@
     {/if}
   </label>
   <label class="flex flex-col items-center gap-1">
-    Pause (minutes)
+    {messages.settings.break}
     <input
       type="number"
       min="1"
@@ -117,7 +118,7 @@
           event,
           "breakMinutes",
           isValidPomodoroMinutes,
-          MINUTES_ERROR_MESSAGE,
+          messages.errors.minutesRange,
         )}
     />
     {#if errors.breakMinutes}
@@ -127,7 +128,7 @@
     {/if}
   </label>
   <label class="flex flex-col items-center gap-1">
-    Longue pause (minutes)
+    {messages.settings.longBreak}
     <input
       type="number"
       min="1"
@@ -138,7 +139,7 @@
           event,
           "longBreakMinutes",
           isValidPomodoroMinutes,
-          MINUTES_ERROR_MESSAGE,
+          messages.errors.minutesRange,
         )}
     />
     {#if errors.longBreakMinutes}
@@ -148,7 +149,7 @@
     {/if}
   </label>
   <label class="flex flex-col items-center gap-1">
-    Répétitions avant longue pause
+    {messages.settings.repetitions}
     <input
       type="number"
       min="1"
@@ -159,7 +160,7 @@
           event,
           "repetitionsBeforeLongBreak",
           isValidRepetitionCount,
-          REPETITIONS_ERROR_MESSAGE,
+          messages.errors.repetitionsRange,
         )}
     />
     {#if errors.repetitionsBeforeLongBreak}

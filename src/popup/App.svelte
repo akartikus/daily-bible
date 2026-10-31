@@ -4,9 +4,14 @@
   import SettingsView from "./components/SettingsView.svelte";
   import VerseView from "./components/VerseView.svelte";
   import PomodoroStatus from "./components/PomodoroStatus.svelte";
+  import { getMessages, resolveUiLocale } from "../shared/i18n";
   import { SettingsStore } from "./lib/settings.svelte.ts";
   import { VerseStore } from "./lib/verse.svelte.ts";
   import { pomodoroStore } from "./lib/pomodoro.svelte.ts";
+
+  // Locale résolue une seule fois par ouverture : un changement de langue du
+  // navigateur s'applique à la prochaine ouverture (contracts/i18n.md).
+  const messages = getMessages(resolveUiLocale(chrome.i18n.getUILanguage()));
 
   const store = new VerseStore();
   const settingsStore = new SettingsStore();
@@ -32,8 +37,8 @@
       <button
         type="button"
         class="rounded px-2 text-gray-400 hover:text-gray-600"
-        aria-label="Réglages"
-        title="Réglages"
+        aria-label={messages.aria.settings}
+        title={messages.aria.settings}
         onclick={() => (view = "settings")}
       >
         ⚙
@@ -44,7 +49,7 @@
         class="rounded px-2 text-sm text-blue-600"
         onclick={() => (view = "verse")}
       >
-        Retour au verset
+        {messages.settings.backToVerse}
       </button>
     {/if}
   </header>
@@ -66,7 +71,7 @@
       <ErrorView message={error} onRetry={() => void store.load()} />
     {:else}
       <main class="flex h-64 w-80 items-center justify-center">
-        <p class="text-lg">Chargement…</p>
+        <p class="text-lg">{messages.loading}</p>
       </main>
     {/if}
   {/if}

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { getMessages, resolveUiLocale } from "../../shared/i18n";
   import { pomodoroStore } from "../lib/pomodoro.svelte.ts";
 
   interface Props {
@@ -10,6 +11,9 @@
 
   // Accès au store via import (singleton)
   const store = pomodoroStore;
+
+  // Locale résolue une seule fois par ouverture (contracts/i18n.md).
+  const messages = getMessages(resolveUiLocale(chrome.i18n.getUILanguage()));
 
   /** Largeur d'un segment de la barre de progression (en %) */
   const segmentWidth = $derived(repetitions > 0 ? 100 / repetitions : 0);
@@ -43,7 +47,7 @@
       <span class="font-medium text-gray-700">{store.statusLabel}</span>
       {#if store.state}
         <span class="text-xs text-gray-500">
-          répétition {store.currentRepetition} / {repetitions}
+          {messages.repetition(store.currentRepetition, repetitions)}
         </span>
       {/if}
     </div>
@@ -55,7 +59,7 @@
       aria-valuenow={store.currentRepetition}
       aria-valuemin={0}
       aria-valuemax={repetitions}
-      aria-label="Progression du cycle pomodoro"
+      aria-label={messages.aria.cycleProgress}
     >
       {#each Array.from({ length: repetitions }, (_, i) => i) as i (i)}
         <div
@@ -77,7 +81,9 @@
         : 'bg-green-500 hover:bg-green-600'}"
       onclick={() => store.toggle()}
       disabled={!store.state}
-      aria-label={store.state?.running ? "Mettre en pause" : "Reprendre"}
+      aria-label={store.state?.running
+        ? messages.aria.pause
+        : messages.aria.resume}
     >
       {#if store.state?.running}
         <span class="flex items-center justify-center gap-1">
@@ -129,7 +135,7 @@
         class="px-3 py-2 text-sm font-medium text-white bg-blue-500 hover:bg-blue-600 rounded-lg transition-colors"
         onclick={() => store.next()}
         disabled={!store.state}
-        aria-label="Focus suivant"
+        aria-label={messages.aria.next}
       >
         <span class="flex items-center justify-center gap-1">
           <svg

@@ -5,6 +5,7 @@
 
 import { sendMessage } from "../../shared/chrome/runtime";
 import { onChanged } from "../../shared/chrome/storage";
+import { getMessages, resolveUiLocale } from "../../shared/i18n";
 import type { PomodoroState } from "../../shared/pomodoro/state";
 
 export interface PomodoroGetStateRequest {
@@ -52,7 +53,9 @@ export class PomodoroStore {
       });
       this.state = response;
     } catch (e) {
-      this.error = "Impossible de charger l'état du pomodoro";
+      this.error = getMessages(
+        resolveUiLocale(chrome.i18n.getUILanguage()),
+      ).store.loadError;
       console.error("Erreur chargement pomodoro:", e);
     }
   }
@@ -91,7 +94,9 @@ export class PomodoroStore {
       });
       this.state = response;
     } catch (e) {
-      this.error = "Échec de la suspension";
+      this.error = getMessages(
+        resolveUiLocale(chrome.i18n.getUILanguage()),
+      ).store.pauseError;
       console.error("Erreur pause:", e);
     }
   }
@@ -105,7 +110,9 @@ export class PomodoroStore {
       });
       this.state = response;
     } catch (e) {
-      this.error = "Échec de la reprise";
+      this.error = getMessages(
+        resolveUiLocale(chrome.i18n.getUILanguage()),
+      ).store.resumeError;
       console.error("Erreur reprise:", e);
     }
   }
@@ -128,7 +135,9 @@ export class PomodoroStore {
       });
       this.state = response;
     } catch (e) {
-      this.error = "Échec du passage au focus suivant";
+      this.error = getMessages(
+        resolveUiLocale(chrome.i18n.getUILanguage()),
+      ).store.nextError;
       console.error("Erreur next:", e);
     }
   }
@@ -138,17 +147,12 @@ export class PomodoroStore {
     return this.state?.status === "break" || this.state?.status === "longBreak";
   }
 
-  /** Libellé du statut pour l'affichage. */
+  /** Libellé du statut pour l'affichage (clé du catalogue — FR-003). */
   get statusLabel(): string {
     if (!this.state) return "—";
-    switch (this.state.status) {
-      case "focus":
-        return "Focus";
-      case "break":
-        return "Pause";
-      case "longBreak":
-        return "Longue pause";
-    }
+    return getMessages(resolveUiLocale(chrome.i18n.getUILanguage())).status[
+      this.state.status
+    ];
   }
 
   /** Nombre total de répétitions (X). */

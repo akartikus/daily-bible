@@ -1,10 +1,15 @@
 <script lang="ts">
+  import { getMessages, resolveUiLocale } from "../../shared/i18n";
+
   interface Props {
     message: string;
     onRetry: () => void;
   }
 
   let { message, onRetry }: Props = $props();
+
+  // Locale résolue une seule fois par ouverture (contracts/i18n.md).
+  const messages = getMessages(resolveUiLocale(chrome.i18n.getUILanguage()));
 </script>
 
 <main
@@ -16,6 +21,6 @@
     class="rounded bg-blue-600 px-4 py-2 text-white"
     onclick={onRetry}
   >
-    Réessayer
+    {messages.aria.retry}
   </button>
 </main>

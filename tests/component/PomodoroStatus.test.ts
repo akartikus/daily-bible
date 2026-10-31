@@ -1,14 +1,21 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/svelte";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createChromeMock, type ChromeMock } from "../mocks/chrome";
+import { getMessages, resolveUiLocale } from "../../src/shared/i18n";
 import PomodoroStatus from "../../src/popup/components/PomodoroStatus.svelte";
 import { pomodoroStore } from "../../src/popup/lib/pomodoro.svelte.ts";
 
-describe("PomodoroStatus", () => {
+// T004 : chaque scénario s'exécute aux deux locales, textes attendus tirés du
+// catalogue de la locale résolue (mock getUILanguage pilotable).
+const languages = ["fr", "en-US"] as const;
+
+describe.each(languages)("PomodoroStatus — locale %s", (language) => {
+  const m = getMessages(resolveUiLocale(language));
   let mock: ChromeMock;
 
   beforeEach(() => {
     mock = createChromeMock();
+    mock.setUiLanguage(language);
     vi.stubGlobal("chrome", mock.chrome);
     // Réinitialiser le store
     pomodoroStore.state = null;
@@ -33,10 +40,10 @@ describe("PomodoroStatus", () => {
 
       render(PomodoroStatus, { props: { repetitions: 4 } });
 
-      expect(screen.getByText("Focus")).toBeTruthy();
+      expect(screen.getByText(m.status.focus)).toBeTruthy();
     });
 
-    it("affiche Pause quand l'état est en pause", () => {
+    it("affiche le libellé localisé quand l'état est en pause", () => {
       pomodoroStore.state = {
         status: "break",
         repetition: 1,
@@ -47,15 +54,15 @@ describe("PomodoroStatus", () => {
 
       render(PomodoroStatus, { props: { repetitions: 4 } });
 
-      // Le statut "Pause" apparaît dans le label de statut (pas le bouton)
-      // Le label de statut a la classe 'font-medium text-gray-700'
-      const statusLabel = screen.getByText("Pause", {
+      // Le libellé de statut se distingue du texte visible du bouton pause
+      // (« Pause ») par ses classes ; en anglais le statut est « Break ».
+      const statusLabel = screen.getByText(m.status.break, {
         selector: "span.font-medium.text-gray-700",
       });
       expect(statusLabel).toBeTruthy();
     });
 
-    it("affiche Longue pause pour longBreak", () => {
+    it("affiche le libellé localisé pour longBreak", () => {
       pomodoroStore.state = {
         status: "longBreak",
         repetition: 4,
@@ -66,7 +73,7 @@ describe("PomodoroStatus", () => {
 
       render(PomodoroStatus, { props: { repetitions: 4 } });
 
-      expect(screen.getByText("Longue pause")).toBeTruthy();
+      expect(screen.getByText(m.status.longBreak)).toBeTruthy();
     });
 
     it("affiche la répétition courante / total", () => {
@@ -80,15 +87,17 @@ describe("PomodoroStatus", () => {
 
       render(PomodoroStatus, { props: { repetitions: 4 } });
 
-      expect(screen.getByText("répétition 2 / 4")).toBeTruthy();
+      expect(screen.getByText(m.repetition(2, 4))).toBeTruthy();
     });
   });
 
   describe("Barre de progression", () => {
-    it("affiche 4 segments pour X=4", () => {
+    it("affiche 4 segments pour X=4, avec son libellé accessible localisé", () => {
       render(PomodoroStatus, { props: { repetitions: 4 } });
 
-      const progressBar = screen.getByRole("progressbar");
+      const progressBar = screen.getByRole("progressbar", {
+        name: m.aria.cycleProgress,
+      });
       const segments = progressBar.querySelectorAll(":scope > div");
       expect(segments.length).toBe(4);
     });
@@ -124,7 +133,7 @@ describe("PomodoroStatus", () => {
   });
 
   describe("Bouton Play/Pause", () => {
-    it("affiche 'Pause' quand running=true", () => {
+    it("porte le libellé accessible pause quand running=true", () => {
       pomodoroStore.state = {
         status: "focus",
         repetition: 1,
@@ -135,13 +144,11 @@ describe("PomodoroStatus", () => {
 
       render(PomodoroStatus, { props: { repetitions: 4 } });
 
-      const button = screen.getByRole("button", {
-        name: /pause|mettre en pause/i,
-      });
+      const button = screen.getByRole("button", { name: m.aria.pause });
       expect(button).toBeTruthy();
     });
 
-    it("affiche 'Play' quand running=false", () => {
+    it("porte le libellé accessible reprise quand running=false", () => {
       pomodoroStore.state = {
         status: "focus",
         repetition: 1,
@@ -152,7 +159,7 @@ describe("PomodoroStatus", () => {
 
       render(PomodoroStatus, { props: { repetitions: 4 } });
 
-      const button = screen.getByRole("button", { name: /play|reprendre/i });
+      const button = screen.getByRole("button", { name: m.aria.resume });
       expect(button).toBeTruthy();
     });
 
@@ -169,9 +176,7 @@ describe("PomodoroStatus", () => {
 
       render(PomodoroStatus, { props: { repetitions: 4 } });
 
-      await fireEvent.click(
-        screen.getByRole("button", { name: /pause|mettre en pause/i }),
-      );
+      await fireEvent.click(screen.getByRole("button", { name: m.aria.pause }));
 
       expect(toggleSpy).toHaveBeenCalledOnce();
     });
@@ -189,9 +194,7 @@ describe("PomodoroStatus", () => {
 
       render(PomodoroStatus, { props: { repetitions: 4 } });
 
-      expect(
-        screen.getByRole("button", { name: /next|focus suivant/i }),
-      ).toBeTruthy();
+      expect(screen.getByRole("button", { name: m.aria.next })).toBeTruthy();
     });
 
     it("est visible en longBreak", () => {
@@ -205,9 +208,7 @@ describe("PomodoroStatus", () => {
 
       render(PomodoroStatus, { props: { repetitions: 4 } });
 
-      expect(
-        screen.getByRole("button", { name: /next|focus suivant/i }),
-      ).toBeTruthy();
+      expect(screen.getByRole("button", { name: m.aria.next })).toBeTruthy();
     });
 
     it("est caché en focus", () => {
@@ -222,7 +223,7 @@ describe("PomodoroStatus", () => {
       render(PomodoroStatus, { props: { repetitions: 4 } });
 
       expect(
-        screen.queryByRole("button", { name: /next|focus suivant/i }),
+        screen.queryByRole("button", { name: m.aria.next }),
       ).not.toBeTruthy();
     });
 
@@ -239,9 +240,7 @@ describe("PomodoroStatus", () => {
 
       render(PomodoroStatus, { props: { repetitions: 4 } });
 
-      await fireEvent.click(
-        screen.getByRole("button", { name: /next|focus suivant/i }),
-      );
+      await fireEvent.click(screen.getByRole("button", { name: m.aria.next }));
 
       expect(nextSpy).toHaveBeenCalledOnce();
     });

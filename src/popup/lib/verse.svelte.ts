@@ -11,8 +11,7 @@ import type {
 import type { Verse } from "../../shared/bible/extract";
 import { sendMessage } from "../../shared/chrome/runtime";
 import { get, onChanged } from "../../shared/chrome/storage";
-
-const UNEXPECTED_ERROR = "Une erreur inattendue s'est produite. Réessayez.";
+import { getMessages, resolveUiLocale } from "../../shared/i18n";
 
 interface CurrentCycle {
   verse: Verse | null;
@@ -43,7 +42,9 @@ export class VerseStore {
         this.error = response.error;
       }
     } catch {
-      this.error = UNEXPECTED_ERROR;
+      this.error = getMessages(
+        resolveUiLocale(chrome.i18n.getUILanguage()),
+      ).errors.unexpected;
     } finally {
       this.loading = false;
     }
