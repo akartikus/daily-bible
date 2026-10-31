@@ -73,6 +73,7 @@ Ce que chaque tâche a apporté, en une ligne courte.
 ## Internationalisation et refonte graphique
 
 - T001 : les composants d'interface et les icônes sont installés ; la charte graphique de base est en place.
+- T002 : tous les textes de l'extension existent en français et en anglais ; la langue suit celle du navigateur (français) ou l'anglais sinon.
 
 ## Finitions / Qualité
 

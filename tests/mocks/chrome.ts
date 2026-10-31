@@ -2,7 +2,7 @@ import { vi } from "vitest";
 
 /**
  * Mock des APIs Chrome consommées par l'extension : storage, alarms, action,
- * runtime. Installation dans une suite de tests :
+ * i18n, runtime. Installation dans une suite de tests :
  *
  * ```ts
  * const mock = createChromeMock();
@@ -40,6 +40,8 @@ type InstalledListener = (details: { reason: "install" | "update" }) => void;
 export interface ChromeMock {
   /** Objet à installer comme global `chrome` (vi.stubGlobal). */
   chrome: typeof chrome;
+  /** Fixe la langue de l'interface (`chrome.i18n.getUILanguage`) ; `undefined` simule une valeur absente. */
+  setUiLanguage(language: string | undefined): void;
   /** Simule le déclenchement de `chrome.alarms.onAlarm`. */
   fireAlarm(name: string): void;
   /** Simule le démarrage du navigateur (`chrome.runtime.onStartup`). */
@@ -61,6 +63,7 @@ export function createChromeMock(): ChromeMock {
   const startupListeners = new Set<StartupListener>();
   const installedListeners = new Set<InstalledListener>();
   const alarms = new Map<string, Alarm>();
+  let uiLanguage: string | undefined;
 
   function fireStorageChange(
     changes: Record<string, StorageChange>,
@@ -147,6 +150,9 @@ export function createChromeMock(): ChromeMock {
     action: {
       openPopup: vi.fn(async (): Promise<void> => {}),
     },
+    i18n: {
+      getUILanguage: vi.fn((): string | undefined => uiLanguage),
+    },
     runtime: {
       sendMessage: vi.fn(
         (message: unknown): Promise<unknown> =>
@@ -203,6 +209,9 @@ export function createChromeMock(): ChromeMock {
 
   return {
     chrome: chromeMock as unknown as typeof chrome,
+    setUiLanguage(language: string | undefined): void {
+      uiLanguage = language;
+    },
     fireAlarm(name: string): void {
       const alarm = alarms.get(name) ?? {
         name,
