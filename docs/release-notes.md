@@ -70,6 +70,10 @@ Ce que chaque tâche a apporté, en une ligne courte.
 - T024 : les neuf parcours de validation manuelle passent dans Chrome.
 - T025 : la documentation des contextes est à jour (minuteur pomodoro).
 
+## Internationalisation et refonte graphique
+
+- T001 : les composants d'interface et les icônes sont installés ; la charte graphique de base est en place.
+
 ## Finitions / Qualité
 
 - T028 : toutes les portes qualité passent (types, tests, lint, format, build, taille du bundle).

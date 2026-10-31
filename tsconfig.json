@@ -17,7 +17,12 @@
     "noFallthroughCasesInSwitch": true,
     "noEmit": true,
     "skipLibCheck": true,
-    "types": ["svelte", "chrome", "vite/client"]
+    "types": ["svelte", "chrome", "vite/client", "node"],
+    "baseUrl": ".",
+    "paths": {
+      "$lib": ["./src/popup"],
+      "$lib/*": ["./src/popup/*"]
+    }
   },
   "include": [
     "src/**/*.ts",

@@ -33,7 +33,7 @@ spec.md) pour permettre implémentation et validation indépendantes.
 
 **Purpose**: Installer le design system et les icônes — tout ce que US2/US3 consomment
 
-- [ ] T001 Installer le design system et les icônes : `@lucide/svelte` (imports par icône, tree-shaké) + init shadcn-svelte (`npx shadcn-svelte@latest init` → `components.json`, dépendances `bits-ui`/`tailwind-variants`/`tailwind-merge`/`clsx`/`tw-animate-css`) + `npx shadcn-svelte@latest add button input label switch` → sources copiées dans src/popup/components/ui/ + variables de thème (`:root`, `@theme inline`, `@custom-variant dark`, palette neutre du thème par défaut — research.md §4) dans src/popup/app.css ; vérifier `npm run check`, `npm run lint` et `npm run build` sur cette base (config eslint/svelte-check ajustée si les sources copiées l'exigent)
+- [X] T001 Installer le design system et les icônes : `@lucide/svelte` (imports par icône, tree-shaké) + init shadcn-svelte (`npx shadcn-svelte@latest init` → `components.json`, dépendances `bits-ui`/`tailwind-variants`/`tailwind-merge`/`clsx`/`tw-animate-css`) + `npx shadcn-svelte@latest add button input label switch` → sources copiées dans src/popup/components/ui/ + variables de thème (`:root`, `@theme inline`, `@custom-variant dark`, palette neutre du thème par défaut — research.md §4) dans src/popup/app.css ; vérifier `npm run check`, `npm run lint` et `npm run build` sur cette base (config eslint/svelte-check ajustée si les sources copiées l'exigent)
 
 ---
 
