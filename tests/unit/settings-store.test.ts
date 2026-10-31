@@ -25,7 +25,8 @@ describe("store des réglages (T025 — contracts/storage-schema.md)", () => {
     expect(chrome.storage.local.set).not.toHaveBeenCalled();
   });
 
-  it("load : réglages présents → valeurs lues", async () => {
+  it("load : réglages présents → valeurs lues, clé orpheline ignorée", async () => {
+    // Installation 001/002 : l'ancienne clé translationId reste en stockage.
     const stored = {
       autoDisplayEnabled: true,
       intervalMinutes: 10,
@@ -38,7 +39,8 @@ describe("store des réglages (T025 — contracts/storage-schema.md)", () => {
 
     expect(store.settings).toEqual({
       ...DEFAULT_SETTINGS,
-      ...stored,
+      autoDisplayEnabled: true,
+      intervalMinutes: 10,
     });
   });
 

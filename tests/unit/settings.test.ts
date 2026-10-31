@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   DEFAULT_SETTINGS,
   readSettings,
+  type Settings,
 } from "../../src/shared/settings/defaults";
 import {
   isValidIntervalMinutes,
@@ -18,10 +19,6 @@ describe("DEFAULT_SETTINGS (défauts — data-model.md)", () => {
     expect(DEFAULT_SETTINGS.intervalMinutes).toBe(25);
   });
 
-  it("fixe la traduction à fra_lsg (v1, non exposée dans l'UI)", () => {
-    expect(DEFAULT_SETTINGS.translationId).toBe("fra_lsg");
-  });
-
   it("fixe les durées pomodoro à 25 / 5 / 15 minutes et X à 4", () => {
     expect(DEFAULT_SETTINGS.focusMinutes).toBe(25);
     expect(DEFAULT_SETTINGS.breakMinutes).toBe(5);
@@ -36,9 +33,21 @@ describe("readSettings (migration des réglages 001)", () => {
       readSettings({
         autoDisplayEnabled: true,
         intervalMinutes: 10,
-        translationId: "fra_lsg",
       }),
     ).toEqual({
+      ...DEFAULT_SETTINGS,
+      autoDisplayEnabled: true,
+      intervalMinutes: 10,
+    });
+  });
+
+  it("ignore la clé orpheline translationId des installations 001/002 (migration invisible)", () => {
+    const legacy = {
+      autoDisplayEnabled: true,
+      intervalMinutes: 10,
+      translationId: "fra_lsg",
+    } as Partial<Settings> & { translationId: string };
+    expect(readSettings(legacy)).toEqual({
       ...DEFAULT_SETTINGS,
       autoDisplayEnabled: true,
       intervalMinutes: 10,

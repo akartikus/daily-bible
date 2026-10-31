@@ -21,7 +21,8 @@ import {
 } from "../shared/pomodoro/state";
 import { readSettings, type Settings } from "../shared/settings/defaults";
 import { openPopup } from "../shared/chrome/action";
-import { drawRandomVerse } from "../shared/bible/draw";
+import { drawRandomVerse, translationForLocale } from "../shared/bible/draw";
+import { resolveUiLocale } from "../shared/i18n";
 
 /** Réglages actuels : stockage fusionné avec les défauts (FR-009/FR-012). */
 async function currentSettings(): Promise<Settings> {
@@ -142,7 +143,9 @@ async function handlePhaseAlarm(now: number): Promise<void> {
     await openPopup();
 
     try {
-      const verse = await drawRandomVerse();
+      const verse = await drawRandomVerse(
+        translationForLocale(resolveUiLocale(chrome.i18n.getUILanguage())),
+      );
       await set("currentCycle", { verse, startedAt: Date.now() });
     } catch {
       // Dégradation gracieuse : ancien verset conservé

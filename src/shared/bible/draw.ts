@@ -9,22 +9,38 @@ import {
   pickUniformVerseNumber,
   pickWeightedBook,
 } from "./random";
+import type { UiLocale } from "../i18n";
 
-export const TRANSLATION_ID = "fra_lsg";
-export const TRANSLATION_NAME = "Louis Segond 1910";
+/** Traduction biblique associée à une locale (contracts/i18n.md §Traductions). */
+export interface Translation {
+  id: string;
+  name: string;
+}
 
-/** Draws a book, chapter, and verse from the current translation. */
-export async function drawRandomVerse(): Promise<Verse> {
-  const bookIndex = await fetchBookIndex(TRANSLATION_ID);
+export const TRANSLATIONS: Record<UiLocale, Translation> = {
+  fr: { id: "fra_lsg", name: "Louis Segond 1910" },
+  en: { id: "eng_kjv", name: "King James Version" },
+};
+
+/** Traduction de la locale : fr → Louis Segond 1910, en → King James Version. */
+export function translationForLocale(locale: UiLocale): Translation {
+  return TRANSLATIONS[locale];
+}
+
+/** Draws a book, chapter, and verse from the given translation. */
+export async function drawRandomVerse(
+  translation: Translation,
+): Promise<Verse> {
+  const bookIndex = await fetchBookIndex(translation.id);
   const book = pickWeightedBook(bookIndex.books);
   const chapter = await fetchChapter(
-    TRANSLATION_ID,
+    translation.id,
     book.id,
     pickUniformChapterNumber(book),
   );
   return extractVerse(
     chapter,
     pickUniformVerseNumber(chapter.numberOfVerses),
-    TRANSLATION_NAME,
+    translation.name,
   );
 }

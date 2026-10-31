@@ -14,8 +14,9 @@
  */
 
 import { BibleApiError } from "../shared/bible/api";
-import { drawRandomVerse } from "../shared/bible/draw";
+import { drawRandomVerse, translationForLocale } from "../shared/bible/draw";
 import type { Verse } from "../shared/bible/extract";
+import { getMessages, resolveUiLocale } from "../shared/i18n";
 import { openPopup } from "../shared/chrome/action";
 import {
   ALARM_NAME,
@@ -96,7 +97,9 @@ async function ensureAlarmFromSettings(): Promise<void> {
 async function onVerseInterval(): Promise<void> {
   await openPopup();
   try {
-    const verse = await drawRandomVerse();
+    const verse = await drawRandomVerse(
+      translationForLocale(resolveUiLocale(chrome.i18n.getUILanguage())),
+    );
     await set("currentCycle", { verse, startedAt: Date.now() });
   } catch (error) {
     // Dégradation gracieuse (FR-011) : l'ancien verset reste affiché ; sans
@@ -111,7 +114,9 @@ async function ensureCurrentVerse(): Promise<EnsureCurrentVerseResponse> {
     if (currentCycle?.verse) {
       return { verse: currentCycle.verse };
     }
-    const verse = await drawRandomVerse();
+    const verse = await drawRandomVerse(
+      translationForLocale(resolveUiLocale(chrome.i18n.getUILanguage())),
+    );
     await set("currentCycle", { verse, startedAt: Date.now() });
     return { verse };
   } catch (error) {
@@ -120,7 +125,8 @@ async function ensureCurrentVerse(): Promise<EnsureCurrentVerseResponse> {
 }
 
 function toUserMessage(error: unknown): string {
+  const messages = getMessages(resolveUiLocale(chrome.i18n.getUILanguage()));
   return error instanceof BibleApiError
-    ? error.message
-    : "Une erreur inattendue s'est produite. Réessayez.";
+    ? messages.errors.bibleUnavailable
+    : messages.errors.unexpected;
 }

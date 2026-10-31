@@ -4,7 +4,7 @@
  */
 
 export type StorageKey =
-  "settings" | "currentCycle" | "bookIndex" | "pomodoroState";
+  "settings" | "currentCycle" | "pomodoroState" | `bookIndex:${string}`;
 
 export interface StorageChange {
   oldValue?: unknown;

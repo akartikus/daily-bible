@@ -1,19 +1,26 @@
 /**
  * Client HTTP de la Free Use Bible API (contracts/bible-api.md). Toute erreur
  * (réseau, HTTP non 200, JSON invalide, lenteur) est mappée vers BibleApiError
- * et son message utilisateur unique (FR-011).
+ * et son code unique (FR-011) ; le texte est résolu à l'affichage depuis la
+ * locale (errors.bibleUnavailable).
  */
 
-import { get, set } from "../chrome/storage";
+import { get, set, type StorageKey } from "../chrome/storage";
 
 const BASE_URL = "https://bible.helloao.org";
 const TIMEOUT_MS = 10_000;
 const CACHE_TTL_MS = 30 * 24 * 60 * 60 * 1000;
 
+/** Code résolu en texte à l'affichage via le catalogue (errors.bibleUnavailable). */
+export type BibleApiErrorCode = "bible-unavailable";
+
 export class BibleApiError extends Error {
+  readonly code: BibleApiErrorCode;
+
   constructor() {
-    super("Versets indisponibles. Vérifiez votre connexion et réessayez.");
+    super("bible-unavailable");
     this.name = "BibleApiError";
+    this.code = "bible-unavailable";
   }
 }
 
@@ -77,11 +84,12 @@ async function fetchJson(url: string): Promise<unknown> {
   }
 }
 
-/** Index des livres, mis en cache dans storage.local (invalidation 30 jours). */
+/** Index des livres, mis en cache par traduction (invalidation 30 jours). */
 export async function fetchBookIndex(
   translationId: string,
 ): Promise<BookIndex> {
-  const cached = await get<BookIndex>("bookIndex");
+  const cacheKey: StorageKey = `bookIndex:${translationId}`;
+  const cached = await get<BookIndex>(cacheKey);
   if (cached && Date.now() - cached.fetchedAt < CACHE_TTL_MS) {
     return cached;
   }
@@ -93,7 +101,7 @@ export async function fetchBookIndex(
     books: payload.books,
     fetchedAt: Date.now(),
   };
-  await set("bookIndex", index);
+  await set(cacheKey, index);
   return index;
 }
 

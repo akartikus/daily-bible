@@ -13,9 +13,9 @@ const TRANSLATION_ID = "fra_lsg";
 const API_ERROR_MESSAGE =
   "Versets indisponibles. Vérifiez votre connexion et réessayez.";
 
-function booksPayload() {
+function booksPayload(translationId: string = TRANSLATION_ID) {
   return {
-    translation: { id: TRANSLATION_ID, name: "Louis Segond 1910" },
+    translation: { id: translationId, name: "Louis Segond 1910" },
     books: [
       {
         id: "GEN",
@@ -33,10 +33,13 @@ function booksPayload() {
   };
 }
 
-function chapterPayload() {
+function chapterPayload(
+  translationId: string = TRANSLATION_ID,
+  bookName: string = "Genèse",
+) {
   return {
-    translation: { id: TRANSLATION_ID },
-    book: { id: "GEN", commonName: "Genèse" },
+    translation: { id: translationId },
+    book: { id: "GEN", commonName: bookName },
     numberOfVerses: 2,
     chapter: {
       number: 6,
@@ -79,6 +82,8 @@ describe("service-worker : orchestration « ensure-current-verse » (T014)", () 
     // mock courant (vi.resetModules vide le registre entre deux tests).
     vi.resetModules();
     mock = createChromeMock();
+    // Interface française par défaut : les tirages partent sur fra_lsg.
+    mock.setUiLanguage("fr");
     vi.stubGlobal("chrome", mock.chrome);
     await import("../../src/background/service-worker");
   });
@@ -121,6 +126,38 @@ describe("service-worker : orchestration « ensure-current-verse » (T014)", () 
     expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 
+  it("interface anglaise : le tirage suit la langue (eng_kjv / King James Version — FR-001)", async () => {
+    mock.setUiLanguage("en-US");
+    vi.spyOn(Math, "random").mockReturnValue(0.1);
+    const fetchMock = vi.fn(async (url: string) => {
+      const path = String(url);
+      if (path.endsWith("/books.json"))
+        return jsonResponse(booksPayload("eng_kjv"));
+      if (path.endsWith("/GEN/6.json"))
+        return jsonResponse(chapterPayload("eng_kjv", "Genesis"));
+      throw new Error(`URL inattendue : ${path}`);
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const response = await sendMessage<EnsureCurrentVerseResponse>({
+      type: "ensure-current-verse",
+    });
+
+    expect(fetchMock.mock.calls[0]?.[0]).toBe(
+      "https://bible.helloao.org/api/eng_kjv/books.json",
+    );
+    expect(response).toEqual({
+      verse: expect.objectContaining({
+        bookId: "GEN",
+        bookName: "Genesis",
+        chapterNumber: 6,
+        verseNumber: 1,
+        translationId: "eng_kjv",
+        translationName: "King James Version",
+      }),
+    });
+  });
+
   it("verset en cours : réaffiche sans consommer de tirage (FR-002)", async () => {
     await set("currentCycle", { verse: existingVerse, startedAt: 1_000 });
     const fetchMock = vi.fn();
@@ -152,6 +189,22 @@ describe("service-worker : orchestration « ensure-current-verse » (T014)", () 
     expect(await get("currentCycle")).toBeUndefined();
   });
 
+  it("API indisponible en interface anglaise : message traduit (FR-002)", async () => {
+    mock.setUiLanguage("en-GB");
+    const fetchMock = vi.fn(async () => {
+      throw new TypeError("Failed to fetch");
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const response = await sendMessage<EnsureCurrentVerseResponse>({
+      type: "ensure-current-verse",
+    });
+
+    expect(response).toEqual({
+      error: "Verses unavailable. Check your connection and try again.",
+    });
+  });
+
   it("message inconnu : aucune réponse (canal fermé sans sendResponse)", async () => {
     const response = await sendMessage<unknown>({ type: "autre-message" });
     expect(response).toBeUndefined();
@@ -166,7 +219,6 @@ function flush(): Promise<void> {
 const enabledSettings = {
   autoDisplayEnabled: true,
   intervalMinutes: 25,
-  translationId: TRANSLATION_ID,
 };
 
 describe("service-worker : pomodoro automatique (T024)", () => {

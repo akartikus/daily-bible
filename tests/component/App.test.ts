@@ -166,7 +166,6 @@ describe("App : navigation réglages (T027 — FR-007/SC-003)", () => {
       expect(await get("settings")).toEqual({
         autoDisplayEnabled: true,
         intervalMinutes: 25,
-        translationId: "fra_lsg",
         focusMinutes: 25,
         breakMinutes: 5,
         longBreakMinutes: 15,

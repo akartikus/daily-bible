@@ -22,7 +22,6 @@ describe("wrapper chrome.storage.local", () => {
     const settings = {
       autoDisplayEnabled: false,
       intervalMinutes: 25,
-      translationId: "fra_lsg",
     };
     await set("settings", settings);
     expect(await get("settings")).toEqual(settings);
@@ -30,8 +29,19 @@ describe("wrapper chrome.storage.local", () => {
 
   it("set transmet { clé: valeur } à chrome.storage.local.set", async () => {
     const bookIndex = { translationId: "fra_lsg", books: [], fetchedAt: 0 };
-    await set("bookIndex", bookIndex);
-    expect(chrome.storage.local.set).toHaveBeenCalledWith({ bookIndex });
+    await set("bookIndex:fra_lsg", bookIndex);
+    expect(chrome.storage.local.set).toHaveBeenCalledWith({
+      "bookIndex:fra_lsg": bookIndex,
+    });
+  });
+
+  it("cache l'index des livres par traduction (bookIndex:<id>)", async () => {
+    const lsg = { translationId: "fra_lsg", books: [], fetchedAt: 0 };
+    const kjv = { translationId: "eng_kjv", books: [], fetchedAt: 0 };
+    await set("bookIndex:fra_lsg", lsg);
+    await set("bookIndex:eng_kjv", kjv);
+    expect(await get("bookIndex:fra_lsg")).toEqual(lsg);
+    expect(await get("bookIndex:eng_kjv")).toEqual(kjv);
   });
 
   it("permet de stocker et relire l'état pomodoro", async () => {

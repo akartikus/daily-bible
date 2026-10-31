@@ -6,7 +6,6 @@
 export interface Settings {
   autoDisplayEnabled: boolean;
   intervalMinutes: number;
-  translationId: string;
   focusMinutes: number;
   breakMinutes: number;
   longBreakMinutes: number;
@@ -16,14 +15,25 @@ export interface Settings {
 export const DEFAULT_SETTINGS: Settings = {
   autoDisplayEnabled: false,
   intervalMinutes: 25,
-  translationId: "fra_lsg",
   focusMinutes: 25,
   breakMinutes: 5,
   longBreakMinutes: 15,
   repetitionsBeforeLongBreak: 4,
 };
 
-/** Fills missing settings with defaults for installations created before pomodoro. */
+/**
+ * Fills missing settings with defaults for installations created before
+ * pomodoro. Only known fields are rebuilt, so orphan keys from older installs
+ * (e.g. the removed translationId) are ignored.
+ */
 export function readSettings(stored?: Partial<Settings>): Settings {
-  return { ...DEFAULT_SETTINGS, ...stored };
+  const merged = { ...DEFAULT_SETTINGS, ...stored };
+  return {
+    autoDisplayEnabled: merged.autoDisplayEnabled,
+    intervalMinutes: merged.intervalMinutes,
+    focusMinutes: merged.focusMinutes,
+    breakMinutes: merged.breakMinutes,
+    longBreakMinutes: merged.longBreakMinutes,
+    repetitionsBeforeLongBreak: merged.repetitionsBeforeLongBreak,
+  };
 }

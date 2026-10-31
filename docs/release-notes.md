@@ -74,6 +74,7 @@ Ce que chaque tâche a apporté, en une ligne courte.
 
 - T001 : les composants d'interface et les icônes sont installés ; la charte graphique de base est en place.
 - T002 : tous les textes de l'extension existent en français et en anglais ; la langue suit celle du navigateur (français) ou l'anglais sinon.
+- T003 : le verset s'affiche dans la traduction de la langue du navigateur — Louis Segond en français, King James Version en anglais.
 
 ## Finitions / Qualité
 

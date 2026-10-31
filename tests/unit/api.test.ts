@@ -12,9 +12,9 @@ const BOOKS_URL = `https://bible.helloao.org/api/${TRANSLATION_ID}/books.json`;
 const CHAPTER_URL = `https://bible.helloao.org/api/${TRANSLATION_ID}/GEN/1.json`;
 const DAY_MS = 24 * 60 * 60 * 1000;
 
-function booksPayload() {
+function booksPayload(translationId: string = TRANSLATION_ID) {
   return {
-    translation: { id: TRANSLATION_ID, name: "Louis Segond 1910" },
+    translation: { id: translationId, name: "Louis Segond 1910" },
     books: [
       {
         id: "GEN",
@@ -105,7 +105,9 @@ describe("client Free Use Bible API (contracts/bible-api.md)", () => {
       const first = await fetchBookIndex(TRANSLATION_ID);
       expect(fetchMock).toHaveBeenCalledTimes(1);
       expect(chrome.storage.local.set).toHaveBeenCalledWith({
-        bookIndex: expect.objectContaining({ translationId: TRANSLATION_ID }),
+        "bookIndex:fra_lsg": expect.objectContaining({
+          translationId: TRANSLATION_ID,
+        }),
       });
 
       const second = await fetchBookIndex(TRANSLATION_ID);
@@ -113,8 +115,34 @@ describe("client Free Use Bible API (contracts/bible-api.md)", () => {
       expect(second).toEqual(first);
     });
 
+    it("chaque traduction a son propre cache (bookIndex:<id>)", async () => {
+      // Index fra_lsg frais en cache : ne doit pas servir eng_kjv
+      await set("bookIndex:fra_lsg", {
+        translationId: "fra_lsg",
+        books: [],
+        fetchedAt: Date.now(),
+      });
+      const fetchMock = vi.fn(async (url: string) => {
+        if (String(url).endsWith("/eng_kjv/books.json")) {
+          return jsonRespond(booksPayload("eng_kjv"));
+        }
+        throw new Error(`URL inattendue : ${url}`);
+      });
+      vi.stubGlobal("fetch", fetchMock);
+
+      const index = await fetchBookIndex("eng_kjv");
+
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+      expect(index.translationId).toBe("eng_kjv");
+      expect(chrome.storage.local.set).toHaveBeenCalledWith({
+        "bookIndex:eng_kjv": expect.objectContaining({
+          translationId: "eng_kjv",
+        }),
+      });
+    });
+
     it("re-télécharge quand le cache a plus de 30 jours", async () => {
-      await set("bookIndex", {
+      await set("bookIndex:fra_lsg", {
         translationId: TRANSLATION_ID,
         books: [],
         fetchedAt: Date.now() - 31 * DAY_MS,
@@ -163,8 +191,8 @@ describe("client Free Use Bible API (contracts/bible-api.md)", () => {
       await rejection;
     });
 
-    it("mappe réseau, HTTP non 200 et JSON invalide vers le même message utilisateur (FR-011)", async () => {
-      const messages: string[] = [];
+    it("mappe réseau, HTTP non 200 et JSON invalide vers le même code bible-unavailable (FR-011)", async () => {
+      const codes: string[] = [];
 
       vi.stubGlobal(
         "fetch",
@@ -172,18 +200,16 @@ describe("client Free Use Bible API (contracts/bible-api.md)", () => {
           throw new TypeError("Failed to fetch");
         }),
       );
-      messages.push(
-        (await captureBibleApiError(() => fetchBookIndex(TRANSLATION_ID)))
-          .message,
+      codes.push(
+        (await captureBibleApiError(() => fetchBookIndex(TRANSLATION_ID))).code,
       );
 
       vi.stubGlobal(
         "fetch",
         vi.fn(async () => ({ status: 500, json: async () => ({}) })),
       );
-      messages.push(
-        (await captureBibleApiError(() => fetchBookIndex(TRANSLATION_ID)))
-          .message,
+      codes.push(
+        (await captureBibleApiError(() => fetchBookIndex(TRANSLATION_ID))).code,
       );
 
       vi.stubGlobal(
@@ -195,14 +221,13 @@ describe("client Free Use Bible API (contracts/bible-api.md)", () => {
           },
         })),
       );
-      messages.push(
-        (await captureBibleApiError(() => fetchBookIndex(TRANSLATION_ID)))
-          .message,
+      codes.push(
+        (await captureBibleApiError(() => fetchBookIndex(TRANSLATION_ID))).code,
       );
 
-      expect(messages[0]).toBeTruthy();
-      expect(messages[1]).toBe(messages[0]);
-      expect(messages[2]).toBe(messages[0]);
+      expect(codes[0]).toBe("bible-unavailable");
+      expect(codes[1]).toBe(codes[0]);
+      expect(codes[2]).toBe(codes[0]);
     });
   });
 });
